@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instax Wide Photo Previewer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Inter font family is typically included with Tailwind, but you can ensure it's preferred */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Define CSS variables for dimensions for easier management */
+        :root {
+            --frame-width-mm: 86;
+            --frame-height-mm: 108;
+            
+            --border-top-mm: 8;
+            --border-bottom-mm: 16;
+            /* Horizontal borders are calculated: (frame_width - image_width) / 2 */
+            /* Image width is 62mm, so (86 - 62) / 2 = 12mm */
+            --border-sides-mm: 12; 
+
+            /* Calculated image area dimensions based on frame and borders */
+            /* --image-area-width-mm: calc(var(--frame-width-mm) - (2 * var(--border-sides-mm))); /* 62mm */
+            /*--image-area-height-mm: calc(var(--frame-height-mm) - var(--border-top-mm) - var(--border-bottom-mm)); /* 84mm */
+            --image-area-width-mm: 62;
+            --image-area-height-mm: 84;
+
+            /* Scale factor for screen preview (e.g., 3px per mm) */
+            --screen-scale: 3;
+        }
+
+        .instax-frame {
+            /*width: calc(var(--frame-width-mm) * var(--screen-scale) * 1px);*/
+            width: 108mm;
+            /*  height: calc(var(--frame-height-mm) * var(--screen-scale) * 1px); */
+            height: 84mm;
+            background-color: white;
+            padding-top: 8mm;
+            padding-left: 5mm;
+            padding-right: 5mm;
+            padding-bottom: 16mm;
+            box-sizing: border-box; /* Important: padding is included in width/height */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-radius: 8px; /* Slightly rounded corners for the frame itself */
+            margin: 20px auto; /* Centering for screen */
+            position: relative; /* For potential future elements if needed */
+            overflow: hidden; /* Ensures image doesn't spill if object-fit issues */
+        }
+
+        .image-inside {
+            width: 100%; /* Fills the content box of .instax-frame (area after padding) */
+            height: 100%;/* Fills the content box of .instax-frame (area after padding) */
+            object-fit: cover; /* Scales and crops image to fill, maintains aspect ratio */
+            display: block; /* Removes any default spacing for img elements */
+            background-color: #e0e0e0; /* Placeholder background for empty image area */
+            border-radius: 2px; /* Slight rounding for the image itself, if desired */
+        }
+
+        /* Print Styles */
+        @media print {
+            /* Hide all elements by default */
+            body > .app-container > *:not(#previewContainer),
+            #previewContainer > *:not(#instaxFrame),
+            .app-container > h1, .app-container > p, .app-container > .text-sm, /* Hide titles and instructions */
+            #imageUpload, #printButton, #uploadPromptText {
+                display: none !important;
+            }
+
+            /* Ensure containers leading to instaxFrame don't add unwanted space/styles */
+            body, .app-container, #previewContainer {
+                margin: 0 !important;
+                padding: 0 !important;
+                border: none !important;
+                background: white !important; 
+                box-shadow: none !important;
+                width: auto !important; /* Allow natural flow for print */
+                height: auto !important;
+            }
+            
+            @page {
+                margin: 0; /* Attempt to remove default browser print margins */
+                size: auto; /* Or specify paper size if known, e.g., size: A4; */
+            }
+
+            #instaxFrame {
+                width: 108mm;
+                height: 84mm;
+                padding-top: 8mm;
+                padding-left: 5mm;
+                padding-right: 5mm;
+                padding-bottom: 16mm;
+                
+                border: 1px dashed #333 !important; /* Cut guide */
+                box-sizing: border-box !important;
+                margin: 0 !important; /* Position at the top-left of the page */
+                box-shadow: none !important;
+                border-radius: 0 !important; /* No rounded corners for print cut guide */
+                page-break-inside: avoid !important; /* Try to keep it on one page */
+                position: absolute; /* Or fixed, to help with positioning */
+                left: 0;
+                top: 0;
+                overflow: hidden !important;
+            }
+
+            #imagePreview {
+                /* Dimensions are implicitly set by parent's padding and 100% width/height */
+                width: 100% !important; 
+                height: 100% !important;
+                object-fit: cover !important;
+                display: block !important;
+                border-radius: 0 !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center py-8 px-4">
+
+    <div class="app-container bg-white p-6 sm:p-8 rounded-xl shadow-xl w-full max-w-lg text-center">
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-3">Instax Wide Photo Maker</h1>
+        <p class="text-gray-600 mb-2">Upload your photo to create an Instax-style print preview.</p>
+        <p class="text-sm text-gray-500 mb-6">
+            The frame is 86mm x 108mm. Your image will be placed in a 62mm x 84mm area,
+            with borders of 8mm (top), 12mm (sides), and 16mm (bottom).
+        </p>
+
+        <label for="imageUpload" class="mb-4 cursor-pointer inline-block bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors duration-150">
+            Upload Image
+        </label>
+        <input type="file" id="imageUpload" accept="image/*" class="hidden">
+
+        <div id="previewContainer" class="my-6">
+            <p id="uploadPromptText" class="text-gray-500">Your photo preview will appear here.</p>
+            <div id="instaxFrame" class="instax-frame" style="display: none;">
+                <img id="imagePreview" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Image Preview" class="image-inside">
+            </div>
+        </div>
+
+        <button id="printButton" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-colors duration-150 text-lg" style="display: none;">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2 -mt-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v6a2 2 0 002 2h1v-4a1 1 0 011-1h8a1 1 0 011 1v4h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clip-rule="evenodd" />
+            </svg>
+            Print with Cut Guide
+        </button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const imageUpload = document.getElementById('imageUpload');
+            const imagePreview = document.getElementById('imagePreview');
+            const instaxFrame = document.getElementById('instaxFrame');
+            const printButton = document.getElementById('printButton');
+            const uploadPromptText = document.getElementById('uploadPromptText');
+
+            // Store the initial transparent GIF source
+            const initialImageSrc = imagePreview.src;
+
+            imageUpload.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        imagePreview.src = e.target.result;
+                        imagePreview.style.backgroundColor = 'transparent'; // In case it was set
+                        instaxFrame.style.display = 'block';
+                        if (uploadPromptText) uploadPromptText.style.display = 'none';
+                        if (printButton) printButton.style.display = 'inline-block';
+                    }
+                    reader.readAsDataURL(file);
+                } else {
+                    // Reset to initial state if no valid file is selected
+                    imagePreview.src = initialImageSrc; // Reset to transparent GIF
+                    imagePreview.style.backgroundColor = '#e0e0e0'; // Restore placeholder bg
+                    instaxFrame.style.display = 'none';
+                    if (uploadPromptText) uploadPromptText.style.display = 'block';
+                    if (printButton) printButton.style.display = 'none';
+                    
+                    // Optionally, inform the user about the error (avoid alert())
+                    if (file) { // Only show if a file was selected but it was invalid
+                        if (uploadPromptText) {
+                             uploadPromptText.textContent = "Please select a valid image file (e.g., JPG, PNG).";
+                             uploadPromptText.style.color = "red";
+                        }
+                    }
+                }
+            });
+
+            if (printButton) {
+                printButton.addEventListener('click', () => {
+                    // Temporarily change title for printing if desired
+                    const originalTitle = document.title;
+                    document.title = "Instax Print - " + (imageUpload.files[0] ? imageUpload.files[0].name : "Photo");
+                    
+                    window.print();
+
+                    // Restore original title after print dialog
+                    // Note: This might run before print dialog is fully closed in some browsers.
+                    // For a more robust solution, a small delay or user action might be needed.
+                    setTimeout(() => {
+                        document.title = originalTitle;
+                    }, 1000);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
+
