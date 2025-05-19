@@ -80,7 +80,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 20px; /* Adds space between multiple paper-sheet previews on screen */
+            gap: 20px;
         }
         #uploadPromptText {
             text-align: center;
@@ -93,19 +93,18 @@
             position: relative;
             width: 152.4mm;
             height: 101.6mm;
-            /* margin: 20px auto; /* Replaced by gap in #previewArea for multiple items */
             background-color: white;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            display: none; /* Initially hidden, JS shows it when image is loaded */
+            display: none;
             overflow: hidden;
         }
 
         .instax-container {
             width: 108mm;
             height: 84mm;
-            position: relative; 
-            margin: 0; /* Resetting any default margin */
-            display: none; /* JS will control this */
+            position: relative;
+            margin: 0;
+            display: none;
         }
         
         .paper-sheet .instax-container {
@@ -153,7 +152,7 @@
             white-space: pre-wrap;
         }
 
-        .instax-container > .trim-mark { /* Safeguard for old trim marks */
+        .instax-container > .trim-mark {
             display: none !important;
         }
 
@@ -185,36 +184,24 @@
                 size: auto;
             }
 
-            #previewArea { /* For print, no gap, items will be on separate pages */
-                width: auto; /* Let it take page width */
-                height: auto; /* Let it take page height */
-                display: block; /* No flex centering needed, page breaks handle layout */
+            #previewArea {
+                width: auto;
+                height: auto;
+                display: block;
                 gap: 0;
             }
 
             .paper-sheet {
                 display: block !important;
-                position: relative; /* Keep for absolute children, if any specific print adjustments were needed */
-                margin: 0 auto !important; /* Center the sheet on the physical page if it's smaller than paper */
+                position: relative;
+                margin: 0 auto !important;
                 box-shadow: none !important;
                 page-break-after: always;
                 page-break-inside: avoid !important;
-                 /* Ensure it's centered if paper is larger than 4x6, e.g. printing on A4/Letter */
-                /* One way to center block on page:
-                position: absolute;
-                left: 50%;
-                top: 50%;
-                transform: translate(-50%, -50%);
-                However, this only works for ONE item per print job page.
-                For multiple pages, `margin: 0 auto` and letting page flow is better.
-                The print preview might need to be set to "Actual Size" or "100%" and correct 4x6 paper.
-                If printing on larger paper, the margin: 0 auto will center it IF the containing block (#previewArea for print) effectively becomes the page area.
-                */
             }
              #previewArea .paper-sheet:last-child {
-                page-break-after: auto; /* Avoid extra blank page */
+                page-break-after: auto;
             }
-
 
             .paper-sheet .instax-container {
                 display: block !important;
@@ -252,7 +239,8 @@
         <label for="imageUpload" class="btn">
             Upload Image(s)
         </label>
-        <input type="file" id="imageUpload" accept="image/*" multiple> <div class="caption-input-area" style="margin-top: 1.5rem; margin-bottom: 1rem; text-align: left;">
+        <input type="file" id="imageUpload" accept="image/*" multiple>
+        <div class="caption-input-area" style="margin-top: 1.5rem; margin-bottom: 1rem; text-align: left;">
             <label for="captionText" style="display:block; margin-bottom:0.35rem; font-weight: 500; font-size:0.9rem; color:#444;">Common Caption (optional):</label>
             <textarea id="captionText" rows="3" placeholder="Enter caption for all photos..." style="width: 100%; padding: 0.6rem; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; line-height: 1.4; resize: vertical;"></textarea>
         </div>
@@ -264,7 +252,7 @@
 
     <div id="previewArea">
         <p id="uploadPromptText">Your photo previews will appear here.</p>
-        </div>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -277,25 +265,16 @@
             function createAndAppendPreview(file, captionText) {
                 const paperSheet = document.createElement('div');
                 paperSheet.className = 'paper-sheet';
-                // paperSheet.style.display = 'none'; // Will be shown after image loads
 
                 const trimMarkClasses = ['top-guide', 'bottom-guide', 'left-guide', 'right-guide'];
-                trimMarkClasses.forEach(cls => {
-                    const mark = document.createElement('div');
-                    mark.className = `extended-trim-mark ${cls}`;
-                    paperSheet.appendChild(mark);
-                });
+                trimMarkClasses.forEach(cls => { const mark = document.createElement('div'); mark.className = `extended-trim-mark ${cls}`; paperSheet.appendChild(mark); });
 
-                const instaxContainer = document.createElement('div');
-                instaxContainer.className = 'instax-container';
-                // instaxContainer.style.display = 'none'; 
-
-                const instaxFrame = document.createElement('div');
-                instaxFrame.className = 'instax-frame';
+                const instaxContainer = document.createElement('div'); instaxContainer.className = 'instax-container';
+                const instaxFrame = document.createElement('div'); instaxFrame.className = 'instax-frame';
 
                 const imageElement = document.createElement('img');
                 imageElement.className = 'image-inside';
-                imageElement.alt = file.name + " preview";
+                imageElement.alt = file.name + ' preview';
                 imageElement.style.backgroundColor = '#e0e0e0';
 
                 const captionDisplay = document.createElement('div');
@@ -308,49 +287,66 @@
                 paperSheet.appendChild(instaxContainer);
                 previewContainer.appendChild(paperSheet);
 
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    imageElement.src = e.target.result;
+                // Inline worker script as a Blob
+                const workerScript = `
+self.onmessage = async ({ data }) => {
+  const { file, targetWidth, targetHeight } = data;
+  const bitmap = await createImageBitmap(file);
+  const offscreen = new OffscreenCanvas(targetWidth, targetHeight);
+  const ctx = offscreen.getContext('2d');
+  ctx.drawImage(bitmap, 0, 0, targetWidth, targetHeight);
+  const blob = await offscreen.convertToBlob({ type: 'image/jpeg', quality: 0.9 });
+  self.postMessage({ blob });
+};
+`;
+                const blobObj = new Blob([workerScript], { type: 'application/javascript' });
+                const workerURL = URL.createObjectURL(blobObj);
+                const worker = new Worker(workerURL);
+
+                worker.postMessage({ file, targetWidth: 2315, targetHeight: 1417 });
+
+                worker.onmessage = ({ data }) => {
+                    const { blob } = data;
+                    const url = URL.createObjectURL(blob);
+                    imageElement.src = url;
                     imageElement.style.backgroundColor = 'transparent';
-                    paperSheet.style.display = 'block'; 
-                    instaxContainer.style.display = 'block'; 
-                };
-                reader.onerror = function() {
-                    console.error("Error reading file:", file.name);
-                    paperSheet.innerHTML = `<p style="text-align:center;color:red;padding:20mm;font-size:0.8em;">Error loading: ${file.name}</p>`;
                     paperSheet.style.display = 'block';
-                    paperSheet.style.border = '1px solid red'; // Indicate error visually
+                    instaxContainer.style.display = 'block';
                 };
-                reader.readAsDataURL(file);
+
+                worker.onerror = (err) => {
+                    console.error('Worker error:', err);
+                    // Fallback to FileReader
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        imageElement.src = e.target.result;
+                        imageElement.style.backgroundColor = 'transparent';
+                        paperSheet.style.display = 'block';
+                        instaxContainer.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                };
             }
 
             imageUpload.addEventListener('change', function(event) {
-                const existingPreviews = previewContainer.querySelectorAll('.paper-sheet');
-                existingPreviews.forEach(preview => preview.remove());
-
+                previewContainer.querySelectorAll('.paper-sheet').forEach(el => el.remove());
                 const files = event.target.files;
-
                 if (files.length > 0) {
                     uploadPromptText.style.display = 'none';
                     printButton.style.display = 'inline-block';
                     const currentCaption = captionInput.value;
-
                     for (const file of files) {
                         if (file.type.startsWith('image/')) {
                             createAndAppendPreview(file, currentCaption);
                         } else {
-                            console.warn("Skipping non-image file:", file.name);
-                            // Create a placeholder indicating a skipped file
-                            const skippedFileDiv = document.createElement('div');
-                            skippedFileDiv.className = 'paper-sheet'; // Use same class for spacing
-                            skippedFileDiv.style.display = 'block';
-                            skippedFileDiv.style.textAlign = 'center';
-                            skippedFileDiv.style.padding = '20mm';
-                            skippedFileDiv.style.fontSize = '0.8em';
-                            skippedFileDiv.style.color = '#777';
-                            skippedFileDiv.style.border = '1px dashed #ccc';
-                            skippedFileDiv.textContent = `Skipped non-image file: ${file.name}`;
-                            previewContainer.appendChild(skippedFileDiv);
+                            console.warn('Skipping non-image file:', file.name);
+                            const skipped = document.createElement('div');
+                            skipped.className = 'paper-sheet'; skipped.style.display = 'block';
+                            skipped.style.textAlign = 'center'; skipped.style.padding = '20mm';
+                            skipped.style.fontSize = '0.8em'; skipped.style.color = '#777';
+                            skipped.style.border = '1px dashed #ccc';
+                            skipped.textContent = `Skipped non-image file: ${file.name}`;
+                            previewContainer.appendChild(skipped);
                         }
                     }
                 } else {
@@ -360,18 +356,15 @@
             });
 
             captionInput.addEventListener('input', function() {
-                const currentCaption = this.value;
-                const allCaptionDisplays = previewContainer.querySelectorAll('.paper-sheet .instax-caption');
-                allCaptionDisplays.forEach(display => {
-                    display.textContent = currentCaption;
-                });
+                previewContainer.querySelectorAll('.instax-caption')
+                    .forEach(d => d.textContent = this.value);
             });
 
             printButton.addEventListener('click', () => {
                 const originalTitle = document.title;
-                let filename = "Instax_Prints_4x6_Collection";
-                if (imageUpload.files[0] && imageUpload.files[0].name) {
-                     filename = "Instax_Batch_" + new Date().toISOString().slice(0,10);
+                let filename = 'Instax_Prints_4x6_Collection';
+                if (imageUpload.files[0]?.name) {
+                    filename = 'Instax_Batch_' + new Date().toISOString().slice(0,10);
                 }
                 document.title = filename.replace(/[^a-z0-9_.\-\s]/gi, '_').replace(/\s+/g, '_');
                 window.print();
@@ -380,3 +373,4 @@
     </script>
 </body>
 </html>
+
