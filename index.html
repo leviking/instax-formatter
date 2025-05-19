@@ -168,12 +168,12 @@
         .instax-subject {
             position: absolute;
             bottom: 12mm; /* Adjust as needed */
-            left: 5mm;  /* Align with frame side padding + a bit more */
+            right: 5mm;  /* Align with frame side padding + a bit more */
             font-size: 2.8mm; /* Adjust size */
             font-family: "Lato", sans-serif;
             color: #333;
             line-height: 1.2;
-            text-align: left;
+            text-align: right;
             max-width: 40%; /* Prevent overlap */
             overflow: hidden;
             text-overflow: ellipsis;
@@ -183,12 +183,12 @@
         .instax-caption { /* This is the multi-line text block */
             position: absolute;
             bottom: 5mm; /* Positioned above the signature if they are separate, or main text position */
-            right: 7mm; /* Align with frame side padding + a bit more */
+            left: 5mm; /* Align with frame side padding + a bit more */
             font-size: 2mm; /* Smaller font size as requested */
             font-family: "Lato", sans-serif;
             color: #333;
             line-height: 1.25; /* Adjust for smaller font */
-            text-align: right;
+            text-align: left;
             white-space: pre-wrap; /* Preserve line breaks from textarea */
             max-width: 50%; /* Prevent overlap with subject if too long */
             max-height: 10mm; /* Max height for the caption block */
