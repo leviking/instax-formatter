@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Instax Multi-Photo Printer - 4x6 Layout</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;1,300;1,900&display=swap" rel="stylesheet">
     <style>
         /* Base and Reset */
         * {
@@ -12,7 +15,7 @@
             padding: 0;
         }
         body {
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+            font-family: "Lato", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
             line-height: 1.5;
             background-color: #e9e9e9;
             display: flex;
@@ -48,6 +51,31 @@
             color: #777;
             margin-bottom: 1.5rem;
         }
+
+        .input-group {
+            margin-bottom: 1rem;
+            text-align: left;
+        }
+        .input-group label {
+            display:block;
+            margin-bottom:0.35rem;
+            font-weight: 500;
+            font-size:0.9rem;
+            color:#444;
+        }
+        .input-group input[type="text"],
+        .input-group textarea {
+            width: 100%;
+            padding: 0.6rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        .input-group textarea {
+            resize: vertical;
+        }
+
 
         .btn {
             display: inline-block;
@@ -91,8 +119,8 @@
 
         .paper-sheet {
             position: relative;
-            width: 152.4mm;
-            height: 101.6mm;
+            width: 152.4mm; /* 6 inches */
+            height: 101.6mm; /* 4 inches */
             background-color: white;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             display: none;
@@ -100,8 +128,8 @@
         }
 
         .instax-container {
-            width: 108mm;
-            height: 84mm;
+            width: 108mm; /* Instax Wide film outer width */
+            height: 84mm; /* Instax Wide film outer height */
             position: relative;
             margin: 0;
             display: none;
@@ -109,8 +137,8 @@
         
         .paper-sheet .instax-container {
             position: absolute;
-            top: 8.8mm;
-            left: 22.2mm;
+            top: 8.8mm;  /* (101.6mm - 84mm) / 2 */
+            left: 22.2mm; /* (152.4mm - 108mm) / 2 */
             box-shadow: none;
             background-color: transparent;
         }
@@ -118,44 +146,72 @@
         .instax-frame {
             width: 100%;
             height: 100%;
-            background-color: white;
-            padding: 8mm 5mm 16mm 5mm;
+            background-color: white; /* Instax border color */
+            /* Padding: Top, Sides, Bottom */
+            padding: 8mm 5mm 16mm 5mm; /* Standard Instax Wide border proportions */
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            border: 1px dashed #aaa;
+            border: 1px dashed #aaa; /* Visual guide for the frame itself */
             position: relative;
         }
 
         .image-inside {
-            width: 100%;
-            height: 100%;
+            width: 100%;  /* Fills the area inside padding */
+            height: 100%; /* Fills the area inside padding */
             object-fit: cover;
             display: block;
-            background-color: #e0e0e0;
+            background-color: #e0e0e0; /* Placeholder bg */
         }
         
-        .instax-caption {
+        .instax-subject {
             position: absolute;
-            bottom: 2mm;
-            left: 5mm;
-            right: 5mm;
-            max-height: 12mm;
-            font-size: 2.5mm;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+            bottom: 12mm; /* Adjust as needed */
+            left: 5mm;  /* Align with frame side padding + a bit more */
+            font-size: 2.8mm; /* Adjust size */
+            font-family: "Lato", sans-serif;
             color: #333;
-            line-height: 1.3;
+            line-height: 1.2;
             text-align: left;
+            max-width: 40%; /* Prevent overlap */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .instax-caption { /* This is the multi-line text block */
+            position: absolute;
+            bottom: 5mm; /* Positioned above the signature if they are separate, or main text position */
+            right: 7mm; /* Align with frame side padding + a bit more */
+            font-size: 2mm; /* Smaller font size as requested */
+            font-family: "Lato", sans-serif;
+            color: #333;
+            line-height: 1.25; /* Adjust for smaller font */
+            text-align: right;
+            white-space: pre-wrap; /* Preserve line breaks from textarea */
+            max-width: 50%; /* Prevent overlap with subject if too long */
+            max-height: 10mm; /* Max height for the caption block */
             overflow-y: hidden;
-            word-wrap: break-word;
-            white-space: pre-wrap;
         }
 
-        .instax-container > .trim-mark {
-            display: none !important;
+        .instax-signature {
+            position: absolute;
+            bottom: 1.5mm; /* Below or aligned with subject */
+            right: 7mm;
+            font-size: 2.5mm; /* Adjust size */
+            font-style: italic; /* Optional styling for signature */
+            font-family: "Lato", sans-serif; /* Or a more script-like font if you add one */
+            color: #444;
+            line-height: 1;
+            text-align: right;
+            max-width: 40%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
+        /* Trim marks for the paper sheet */
         .extended-trim-mark {
             position: absolute;
             z-index: 5;
@@ -175,13 +231,13 @@
                 print-color-adjust: exact !important;
             }
 
-            .controls-container, #printButton, #uploadPromptText, .caption-input-area {
+            .controls-container, #printButton, #uploadPromptText {
                 display: none !important;
             }
 
             @page {
                 margin: 0;
-                size: auto;
+                size: 6in 4in; /* Explicitly set page size for printing */
             }
 
             #previewArea {
@@ -193,8 +249,8 @@
 
             .paper-sheet {
                 display: block !important;
-                position: relative;
-                margin: 0 auto !important;
+                position: relative; /* Changed from fixed/absolute for page flow */
+                margin: 0 auto !important; /* Center on page if needed, but margin:0 from @page should handle */
                 box-shadow: none !important;
                 page-break-after: always;
                 page-break-inside: avoid !important;
@@ -208,13 +264,16 @@
             }
 
             .instax-frame {
-                border: 1px dashed #aaa !important;
+                border: 1px dashed #888 !important; /* Lighter dash for print or transparent */
             }
             
-            .instax-caption {
-                color: #000000 !important;
-                font-size: 2.5mm !important;
+            .instax-subject, .instax-caption, .instax-signature {
+                color: #000000 !important; /* Ensure text is black for printing */
             }
+            .instax-subject { font-size: 2.8mm !important; }
+            .instax-caption { font-size: 2mm !important; }
+            .instax-signature { font-size: 2.5mm !important; }
+
 
             .top-guide    { border-top-color: #000000 !important; }
             .bottom-guide { border-bottom-color: #000000 !important; }
@@ -230,7 +289,7 @@
 <body>
     <div class="controls-container">
         <h1>Instax Wide Photo Printer</h1>
-        <p>Upload your photo(s). Each will be centered on a 4x6 inch layout with your caption and trim marks.</p>
+        <p>Upload your photo(s). Each will be centered on a 4x6 inch layout with your subject, caption, and signature.</p>
         <p class="dimensions-info">
             Paper: 4in × 6in. Instax Frame (Outer): 84mm × 108mm.<br>
             Photo Area (approx): 60mm × 98mm.
@@ -240,9 +299,20 @@
             Upload Image(s)
         </label>
         <input type="file" id="imageUpload" accept="image/*" multiple>
-        <div class="caption-input-area" style="margin-top: 1.5rem; margin-bottom: 1rem; text-align: left;">
-            <label for="captionText" style="display:block; margin-bottom:0.35rem; font-weight: 500; font-size:0.9rem; color:#444;">Common Caption (optional):</label>
-            <textarea id="captionText" rows="3" placeholder="Enter caption for all photos..." style="width: 100%; padding: 0.6rem; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; line-height: 1.4; resize: vertical;"></textarea>
+        
+        <div class="input-group" style="margin-top: 1.5rem;">
+            <label for="subjectText">Subject (bottom-left):</label>
+            <input type="text" id="subjectText" placeholder="Enter subject text...">
+        </div>
+
+        <div class="input-group">
+            <label for="captionText">Caption (bottom-right, multi-line):</label>
+            <textarea id="captionText" rows="3" placeholder="Enter caption for all photos..."></textarea>
+        </div>
+
+        <div class="input-group">
+            <label for="signatureText">Signature (bottom-right):</label>
+            <input type="text" id="signatureText" placeholder="Enter signature text...">
         </div>
 
         <button id="printButton" class="btn btn-print" style="display: none;">
@@ -260,50 +330,89 @@
             const previewContainer = document.getElementById('previewArea');
             const printButton = document.getElementById('printButton');
             const uploadPromptText = document.getElementById('uploadPromptText');
+            
+            const subjectInput = document.getElementById('subjectText');
             const captionInput = document.getElementById('captionText');
+            const signatureInput = document.getElementById('signatureText');
 
-            function createAndAppendPreview(file, captionText) {
+            function createAndAppendPreview(file, subjectText, captionText, signatureText) {
                 const paperSheet = document.createElement('div');
                 paperSheet.className = 'paper-sheet';
 
                 const trimMarkClasses = ['top-guide', 'bottom-guide', 'left-guide', 'right-guide'];
-                trimMarkClasses.forEach(cls => { const mark = document.createElement('div'); mark.className = `extended-trim-mark ${cls}`; paperSheet.appendChild(mark); });
+                trimMarkClasses.forEach(cls => { 
+                    const mark = document.createElement('div'); 
+                    mark.className = `extended-trim-mark ${cls}`; 
+                    paperSheet.appendChild(mark); 
+                });
 
-                const instaxContainer = document.createElement('div'); instaxContainer.className = 'instax-container';
-                const instaxFrame = document.createElement('div'); instaxFrame.className = 'instax-frame';
+                const instaxContainer = document.createElement('div'); 
+                instaxContainer.className = 'instax-container';
+                
+                const instaxFrame = document.createElement('div'); 
+                instaxFrame.className = 'instax-frame';
 
                 const imageElement = document.createElement('img');
                 imageElement.className = 'image-inside';
                 imageElement.alt = file.name + ' preview';
-                imageElement.style.backgroundColor = '#e0e0e0';
+                imageElement.style.backgroundColor = '#e0e0e0'; // Placeholder
+
+                const subjectDisplay = document.createElement('div');
+                subjectDisplay.className = 'instax-subject';
+                subjectDisplay.textContent = subjectText;
 
                 const captionDisplay = document.createElement('div');
                 captionDisplay.className = 'instax-caption';
                 captionDisplay.textContent = captionText;
 
+                const signatureDisplay = document.createElement('div');
+                signatureDisplay.className = 'instax-signature';
+                signatureDisplay.textContent = signatureText;
+
                 instaxFrame.appendChild(imageElement);
+                instaxFrame.appendChild(subjectDisplay);
                 instaxFrame.appendChild(captionDisplay);
+                instaxFrame.appendChild(signatureDisplay);
+                
                 instaxContainer.appendChild(instaxFrame);
                 paperSheet.appendChild(instaxContainer);
                 previewContainer.appendChild(paperSheet);
 
                 // Inline worker script as a Blob
                 const workerScript = `
-self.onmessage = async ({ data }) => {
-  const { file, targetWidth, targetHeight } = data;
-  const bitmap = await createImageBitmap(file);
-  const offscreen = new OffscreenCanvas(targetWidth, targetHeight);
-  const ctx = offscreen.getContext('2d');
-  ctx.drawImage(bitmap, 0, 0, targetWidth, targetHeight);
-  const blob = await offscreen.convertToBlob({ type: 'image/jpeg', quality: 0.9 });
-  self.postMessage({ blob });
-};
-`;
+                    self.onmessage = async ({ data }) => {
+                        const { file, targetWidth, targetHeight } = data;
+                        const bitmap = await createImageBitmap(file);
+                        
+                        // Calculate actual image dimensions for the instax photo area
+                        // Instax Wide Photo Area: approx 99mm (width) x 62mm (height)
+                        // Frame padding: top 8mm, sides 5mm, bottom 16mm
+                        // Image container width: 108mm - (2 * 5mm) = 98mm
+                        // Image container height: 84mm - 8mm - 16mm = 60mm
+                        // Let's use DPI for conversion: 300 DPI
+                        // 98mm to pixels at 300 DPI = (98 / 25.4) * 300 = 1157 pixels
+                        // 60mm to pixels at 300 DPI = (60 / 25.4) * 300 = 709 pixels
+                        // The worker is resizing to targetWidth, targetHeight which are passed
+                        // The CSS object-fit:cover handles the display aspect ratio.
+
+                        const offscreen = new OffscreenCanvas(bitmap.width, bitmap.height); // Use original bitmap dimensions first
+                        const ctx = offscreen.getContext('2d');
+                        ctx.drawImage(bitmap, 0, 0); // Draw full image
+                        
+                        // The conversion to Blob will handle final compression.
+                        // Quality of JPEG is important.
+                        const blob = await offscreen.convertToBlob({ type: 'image/jpeg', quality: 0.92 });
+                        self.postMessage({ blob });
+                    };
+                `;
                 const blobObj = new Blob([workerScript], { type: 'application/javascript' });
                 const workerURL = URL.createObjectURL(blobObj);
                 const worker = new Worker(workerURL);
 
-                worker.postMessage({ file, targetWidth: 2315, targetHeight: 1417 });
+                // targetWidth & targetHeight for worker are more about processing constraints
+                // The CSS object-fit:cover on .image-inside is what actually fits it visually.
+                // Let's use a reasonable processing size.
+                worker.postMessage({ file, targetWidth: 2400, targetHeight: 1800 }); // Example processing dimensions
 
                 worker.onmessage = ({ data }) => {
                     const { blob } = data;
@@ -311,12 +420,12 @@ self.onmessage = async ({ data }) => {
                     imageElement.src = url;
                     imageElement.style.backgroundColor = 'transparent';
                     paperSheet.style.display = 'block';
-                    instaxContainer.style.display = 'block';
+                    instaxContainer.style.display = 'block'; 
+                    URL.revokeObjectURL(workerURL); // Clean up blob URL for the worker script
                 };
 
                 worker.onerror = (err) => {
                     console.error('Worker error:', err);
-                    // Fallback to FileReader
                     const reader = new FileReader();
                     reader.onload = function(e) {
                         imageElement.src = e.target.result;
@@ -325,26 +434,51 @@ self.onmessage = async ({ data }) => {
                         instaxContainer.style.display = 'block';
                     };
                     reader.readAsDataURL(file);
+                    URL.revokeObjectURL(workerURL); // Clean up
                 };
             }
 
             imageUpload.addEventListener('change', function(event) {
-                previewContainer.querySelectorAll('.paper-sheet').forEach(el => el.remove());
+                // Clear previous previews
+                while (previewContainer.firstChild && previewContainer.firstChild !== uploadPromptText) {
+                    if (previewContainer.firstChild.querySelector && previewContainer.firstChild.querySelector('.image-inside')) {
+                         const oldUrl = previewContainer.firstChild.querySelector('.image-inside').src;
+                         if (oldUrl && oldUrl.startsWith('blob:')) {
+                            URL.revokeObjectURL(oldUrl);
+                         }
+                    }
+                    previewContainer.removeChild(previewContainer.firstChild);
+                }
+                if(uploadPromptText.nextSibling) { // if there are elements after prompt, clear them
+                     while (uploadPromptText.nextSibling) {
+                         if (uploadPromptText.nextSibling.querySelector && uploadPromptText.nextSibling.querySelector('.image-inside')) {
+                             const oldUrl = uploadPromptText.nextSibling.querySelector('.image-inside').src;
+                             if (oldUrl && oldUrl.startsWith('blob:')) {
+                                URL.revokeObjectURL(oldUrl);
+                             }
+                         }
+                         uploadPromptText.nextSibling.remove();
+                     }
+                }
+
+
                 const files = event.target.files;
                 if (files.length > 0) {
                     uploadPromptText.style.display = 'none';
                     printButton.style.display = 'inline-block';
+                    
+                    const currentSubject = subjectInput.value;
                     const currentCaption = captionInput.value;
+                    const currentSignature = signatureInput.value;
+
                     for (const file of files) {
                         if (file.type.startsWith('image/')) {
-                            createAndAppendPreview(file, currentCaption);
+                            createAndAppendPreview(file, currentSubject, currentCaption, currentSignature);
                         } else {
                             console.warn('Skipping non-image file:', file.name);
                             const skipped = document.createElement('div');
-                            skipped.className = 'paper-sheet'; skipped.style.display = 'block';
-                            skipped.style.textAlign = 'center'; skipped.style.padding = '20mm';
-                            skipped.style.fontSize = '0.8em'; skipped.style.color = '#777';
-                            skipped.style.border = '1px dashed #ccc';
+                            skipped.className = 'paper-sheet'; 
+                            skipped.style.cssText = 'display:block; text-align:center; padding:20mm; font-size:0.8em; color:#777; border:1px dashed #ccc;';
                             skipped.textContent = `Skipped non-image file: ${file.name}`;
                             previewContainer.appendChild(skipped);
                         }
@@ -355,22 +489,46 @@ self.onmessage = async ({ data }) => {
                 }
             });
 
+            function updateAllTextPreviews(selector, value) {
+                previewContainer.querySelectorAll(selector)
+                    .forEach(el => el.textContent = value);
+            }
+
+            subjectInput.addEventListener('input', function() {
+                updateAllTextPreviews('.instax-subject', this.value);
+            });
             captionInput.addEventListener('input', function() {
-                previewContainer.querySelectorAll('.instax-caption')
-                    .forEach(d => d.textContent = this.value);
+                updateAllTextPreviews('.instax-caption', this.value);
+            });
+            signatureInput.addEventListener('input', function() {
+                updateAllTextPreviews('.instax-signature', this.value);
             });
 
             printButton.addEventListener('click', () => {
                 const originalTitle = document.title;
                 let filename = 'Instax_Prints_4x6_Collection';
-                if (imageUpload.files[0]?.name) {
-                    filename = 'Instax_Batch_' + new Date().toISOString().slice(0,10);
+                // Use the first uploaded image name for a more specific batch name if available
+                if (imageUpload.files && imageUpload.files.length > 0 && imageUpload.files[0]?.name) {
+                    const firstFileName = imageUpload.files[0].name.split('.').slice(0, -1).join('.'); // Name without extension
+                    filename = `Instax_Batch_${firstFileName}_${new Date().toISOString().slice(0,10)}`;
+                } else {
+                     filename = `Instax_Batch_${new Date().toISOString().slice(0,10)}`;
                 }
                 document.title = filename.replace(/[^a-z0-9_.\-\s]/gi, '_').replace(/\s+/g, '_');
+                
                 window.print();
+                
+                // Optional: Restore original title after print dialog
+                // setTimeout(() => { document.title = originalTitle; }, 1000);
             });
+            
+            // Restore title if print is cancelled or done
+            window.onafterprint = () => {
+                // document.title = originalTitle; // This won't work as originalTitle is not in this scope
+                // For simplicity, we might just leave the title as the filename, or reset to a default.
+                // document.title = "Instax Multi-Photo Printer - 4x6 Layout";
+            };
         });
     </script>
 </body>
 </html>
-
