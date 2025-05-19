@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instax Wide Photo Printer - 4x6 Layout with Caption</title>
+    <title>Instax Multi-Photo Printer - 4x6 Layout</title>
     <style>
         /* Base and Reset */
         * {
@@ -66,7 +66,7 @@
         }
         .btn-print {
             background: #2ecc71;
-            margin-top: 1rem; /* Will be after caption input */
+            margin-top: 1rem;
         }
         .btn-print:hover {
             background: #27ae60;
@@ -80,6 +80,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            gap: 20px; /* Adds space between multiple paper-sheet previews on screen */
         }
         #uploadPromptText {
             text-align: center;
@@ -90,29 +91,28 @@
 
         .paper-sheet {
             position: relative;
-            width: 152.4mm;  /* 6 inches */
-            height: 101.6mm; /* 4 inches */
-            margin: 20px auto;
+            width: 152.4mm;
+            height: 101.6mm;
+            /* margin: 20px auto; /* Replaced by gap in #previewArea for multiple items */
             background-color: white;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            display: none;
+            display: none; /* Initially hidden, JS shows it when image is loaded */
             overflow: hidden;
         }
 
-        .instax-container { /* Base styles, mostly overridden when inside .paper-sheet */
+        .instax-container {
             width: 108mm;
             height: 84mm;
-            position: relative;
-            margin: 20px auto; /* For standalone display if not in paper-sheet */
-            display: none;
+            position: relative; 
+            margin: 0; /* Resetting any default margin */
+            display: none; /* JS will control this */
         }
         
-        .paper-sheet .instax-container { /* Styles when Instax is inside the paper */
+        .paper-sheet .instax-container {
             position: absolute;
-            top: 8.8mm;   /* (Paper Height - Instax Height) / 2 */
-            left: 22.2mm;  /* (Paper Width - Instax Width) / 2 */
+            top: 8.8mm;
+            left: 22.2mm;
             box-shadow: none;
-            margin: 0;
             background-color: transparent;
         }
 
@@ -120,13 +120,13 @@
             width: 100%;
             height: 100%;
             background-color: white;
-            padding: 8mm 5mm 16mm 5mm; /* T R B L -> Bottom padding is 16mm */
+            padding: 8mm 5mm 16mm 5mm;
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden; /* Clips the image-inside */
-            border: 1px dashed #aaa; /* Dashed border for the frame itself */
-            position: relative; /* Crucial for positioning the caption absolutely inside it */
+            overflow: hidden;
+            border: 1px dashed #aaa;
+            position: relative;
         }
 
         .image-inside {
@@ -137,64 +137,36 @@
             background-color: #e0e0e0;
         }
         
-        /* Caption Display Styles */
         .instax-caption {
             position: absolute;
-            bottom: 2mm;   /* Distance from the bottom edge of the instax-frame's border */
-            left: 5mm;     /* Aligns with the left padding of the photo (instax-frame's left padding) */
-            right: 5mm;    /* Aligns with the right padding of the photo (instax-frame's right padding) */
-            max-height: 12mm; /* Max height for caption: 16mm (padding-bottom) - 2mm (bottom offset) - ~2mm (top margin) */
-            font-size: 2.5mm; /* Approx 7pt */
+            bottom: 2mm;
+            left: 5mm;
+            right: 5mm;
+            max-height: 12mm;
+            font-size: 2.5mm;
             font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-            color: #333;    /* Caption color on screen */
+            color: #333;
             line-height: 1.3;
             text-align: left;
-            overflow-y: hidden; /* Hides text that overflows max-height */
-            word-wrap: break-word; /* Allows long words to break and wrap */
-            white-space: pre-wrap; /* Respects newlines from textarea for display */
+            overflow-y: hidden;
+            word-wrap: break-word;
+            white-space: pre-wrap;
         }
 
-        /* Hide OLD L-shaped trim marks if they exist as direct children of .instax-container (safeguard) */
-        .instax-container > .trim-mark {
+        .instax-container > .trim-mark { /* Safeguard for old trim marks */
             display: none !important;
         }
 
-        /* Extended Trim Marks - Dashed */
         .extended-trim-mark {
             position: absolute;
             z-index: 5;
-            background-color: transparent; /* Ensure no background interferes with border */
+            background-color: transparent;
         }
-        .top-guide {
-            top: 8.8mm;
-            left: 0;
-            width: 100%;
-            height: 0; 
-            border-top: 1px dashed #555;
-        }
-        .bottom-guide {
-            bottom: 8.8mm;
-            left: 0;
-            width: 100%;
-            height: 0;
-            border-bottom: 1px dashed #555;
-        }
-        .left-guide {
-            left: 22.2mm;
-            top: 0;
-            height: 100%;
-            width: 0;
-            border-left: 1px dashed #555;
-        }
-        .right-guide {
-            right: 22.2mm;
-            top: 0;
-            height: 100%;
-            width: 0;
-            border-right: 1px dashed #555;
-        }
+        .top-guide    { top: 8.8mm; left: 0; width: 100%; height: 0; border-top: 1px dashed #555; }
+        .bottom-guide { bottom: 8.8mm; left: 0; width: 100%; height: 0; border-bottom: 1px dashed #555; }
+        .left-guide   { left: 22.2mm; top: 0; height: 100%; width: 0; border-left: 1px dashed #555; }
+        .right-guide  { right: 22.2mm; top: 0; height: 100%; width: 0; border-right: 1px dashed #555; }
 
-        /* Print Styles */
         @media print {
             body {
                 background-color: white !important;
@@ -204,7 +176,7 @@
                 print-color-adjust: exact !important;
             }
 
-            .controls-container, #printButton, #uploadPromptText, .caption-input-area /* Also hide caption input controls */ {
+            .controls-container, #printButton, #uploadPromptText, .caption-input-area {
                 display: none !important;
             }
 
@@ -213,22 +185,36 @@
                 size: auto;
             }
 
-            #previewArea {
-                width: 100vw;
-                height: 100vh;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                padding:0; margin:0;
+            #previewArea { /* For print, no gap, items will be on separate pages */
+                width: auto; /* Let it take page width */
+                height: auto; /* Let it take page height */
+                display: block; /* No flex centering needed, page breaks handle layout */
+                gap: 0;
             }
 
             .paper-sheet {
                 display: block !important;
-                position: relative;
-                margin: 0 !important;
+                position: relative; /* Keep for absolute children, if any specific print adjustments were needed */
+                margin: 0 auto !important; /* Center the sheet on the physical page if it's smaller than paper */
                 box-shadow: none !important;
+                page-break-after: always;
                 page-break-inside: avoid !important;
+                 /* Ensure it's centered if paper is larger than 4x6, e.g. printing on A4/Letter */
+                /* One way to center block on page:
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%);
+                However, this only works for ONE item per print job page.
+                For multiple pages, `margin: 0 auto` and letting page flow is better.
+                The print preview might need to be set to "Actual Size" or "100%" and correct 4x6 paper.
+                If printing on larger paper, the margin: 0 auto will center it IF the containing block (#previewArea for print) effectively becomes the page area.
+                */
             }
+             #previewArea .paper-sheet:last-child {
+                page-break-after: auto; /* Avoid extra blank page */
+            }
+
 
             .paper-sheet .instax-container {
                 display: block !important;
@@ -239,24 +225,14 @@
             }
             
             .instax-caption {
-                color: #000000 !important; /* Ensure caption text is black for print */
-                font-size: 2.5mm !important; /* Ensure consistent font size in print */
+                color: #000000 !important;
+                font-size: 2.5mm !important;
             }
 
-            .extended-trim-mark {
-                /* Border style is inherited, only color needs to be ensured for print */
-            }
             .top-guide    { border-top-color: #000000 !important; }
             .bottom-guide { border-bottom-color: #000000 !important; }
             .left-guide   { border-left-color: #000000 !important; }
             .right-guide  { border-right-color: #000000 !important; }
-            /* If you wanted to ensure they are dashed for print specifically:
-            .top-guide    { border-top-style: dashed !important; }
-            .bottom-guide { border-bottom-style: dashed !important; }
-            .left-guide   { border-left-style: dashed !important; }
-            .right-guide  { border-right-style: dashed !important; }
-            */
-
 
             .image-inside {
                  background-color: transparent !important;
@@ -267,114 +243,138 @@
 <body>
     <div class="controls-container">
         <h1>Instax Wide Photo Printer</h1>
-        <p>Upload your photo. It will be centered on a 4x6 inch layout with trim marks.</p>
+        <p>Upload your photo(s). Each will be centered on a 4x6 inch layout with your caption and trim marks.</p>
         <p class="dimensions-info">
             Paper: 4in × 6in. Instax Frame (Outer): 84mm × 108mm.<br>
             Photo Area (approx): 60mm × 98mm.
         </p>
 
         <label for="imageUpload" class="btn">
-            Upload Image
+            Upload Image(s)
         </label>
-        <input type="file" id="imageUpload" accept="image/*">
-
-        <div class="caption-input-area" style="margin-top: 1.5rem; margin-bottom: 1rem; text-align: left;">
-            <label for="captionText" style="display:block; margin-bottom:0.35rem; font-weight: 500; font-size:0.9rem; color:#444;">Caption (optional):</label>
-            <textarea id="captionText" rows="3" placeholder="Enter your caption here..." style="width: 100%; padding: 0.6rem; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; line-height: 1.4; resize: vertical;"></textarea>
+        <input type="file" id="imageUpload" accept="image/*" multiple> <div class="caption-input-area" style="margin-top: 1.5rem; margin-bottom: 1rem; text-align: left;">
+            <label for="captionText" style="display:block; margin-bottom:0.35rem; font-weight: 500; font-size:0.9rem; color:#444;">Common Caption (optional):</label>
+            <textarea id="captionText" rows="3" placeholder="Enter caption for all photos..." style="width: 100%; padding: 0.6rem; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; line-height: 1.4; resize: vertical;"></textarea>
         </div>
 
         <button id="printButton" class="btn btn-print" style="display: none;">
-            Print 4x6 Layout
+            Print All Layouts
         </button>
     </div>
 
     <div id="previewArea">
-        <p id="uploadPromptText">Your photo preview will appear here.</p>
-
-        <div class="paper-sheet"> <div class="extended-trim-mark top-guide"></div>
-            <div class="extended-trim-mark bottom-guide"></div>
-            <div class="extended-trim-mark left-guide"></div>
-            <div class="extended-trim-mark right-guide"></div>
-
-            <div class="instax-container">
-                <div class="instax-frame">
-                    <img id="imagePreview" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Image Preview" class="image-inside">
-                    <div class="instax-caption"></div> </div>
-            </div>
+        <p id="uploadPromptText">Your photo previews will appear here.</p>
         </div>
-    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const imageUpload = document.getElementById('imageUpload');
-            const imagePreview = document.getElementById('imagePreview');
-            const paperSheet = document.querySelector('.paper-sheet');
-            const instaxContainer = document.querySelector('.paper-sheet .instax-container');
+            const previewContainer = document.getElementById('previewArea');
             const printButton = document.getElementById('printButton');
             const uploadPromptText = document.getElementById('uploadPromptText');
-
             const captionInput = document.getElementById('captionText');
-            const captionDisplay = document.querySelector('.instax-caption');
 
-            captionInput.addEventListener('input', function() {
-                captionDisplay.textContent = this.value;
-            });
+            function createAndAppendPreview(file, captionText) {
+                const paperSheet = document.createElement('div');
+                paperSheet.className = 'paper-sheet';
+                // paperSheet.style.display = 'none'; // Will be shown after image loads
+
+                const trimMarkClasses = ['top-guide', 'bottom-guide', 'left-guide', 'right-guide'];
+                trimMarkClasses.forEach(cls => {
+                    const mark = document.createElement('div');
+                    mark.className = `extended-trim-mark ${cls}`;
+                    paperSheet.appendChild(mark);
+                });
+
+                const instaxContainer = document.createElement('div');
+                instaxContainer.className = 'instax-container';
+                // instaxContainer.style.display = 'none'; 
+
+                const instaxFrame = document.createElement('div');
+                instaxFrame.className = 'instax-frame';
+
+                const imageElement = document.createElement('img');
+                imageElement.className = 'image-inside';
+                imageElement.alt = file.name + " preview";
+                imageElement.style.backgroundColor = '#e0e0e0';
+
+                const captionDisplay = document.createElement('div');
+                captionDisplay.className = 'instax-caption';
+                captionDisplay.textContent = captionText;
+
+                instaxFrame.appendChild(imageElement);
+                instaxFrame.appendChild(captionDisplay);
+                instaxContainer.appendChild(instaxFrame);
+                paperSheet.appendChild(instaxContainer);
+                previewContainer.appendChild(paperSheet);
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imageElement.src = e.target.result;
+                    imageElement.style.backgroundColor = 'transparent';
+                    paperSheet.style.display = 'block'; 
+                    instaxContainer.style.display = 'block'; 
+                };
+                reader.onerror = function() {
+                    console.error("Error reading file:", file.name);
+                    paperSheet.innerHTML = `<p style="text-align:center;color:red;padding:20mm;font-size:0.8em;">Error loading: ${file.name}</p>`;
+                    paperSheet.style.display = 'block';
+                    paperSheet.style.border = '1px solid red'; // Indicate error visually
+                };
+                reader.readAsDataURL(file);
+            }
 
             imageUpload.addEventListener('change', function(event) {
-                const file = event.target.files[0];
-                if (file && file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        imagePreview.src = e.target.result;
-                        imagePreview.style.backgroundColor = 'transparent';
+                const existingPreviews = previewContainer.querySelectorAll('.paper-sheet');
+                existingPreviews.forEach(preview => preview.remove());
 
-                        paperSheet.style.display = 'block';
-                        instaxContainer.style.display = 'block'; // Ensure instax-container is also shown
+                const files = event.target.files;
 
-                        // Populate caption from current input value, in case it was typed before image load
-                        captionDisplay.textContent = captionInput.value;
+                if (files.length > 0) {
+                    uploadPromptText.style.display = 'none';
+                    printButton.style.display = 'inline-block';
+                    const currentCaption = captionInput.value;
 
-                        uploadPromptText.style.display = 'none';
-                        printButton.style.display = 'inline-block';
-                    };
-                    reader.readAsDataURL(file);
-                } else { // No file selected, or invalid file
-                    imagePreview.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
-                    imagePreview.style.backgroundColor = '#e0e0e0';
-                    
-                    if (file) { // Invalid file type specifically
-                        uploadPromptText.textContent = "Invalid file. Please select an image (e.g., JPG, PNG).";
-                        uploadPromptText.style.color = "#e74c3c";
-                    } else { // Dialog cancelled or no file
-                        uploadPromptText.textContent = "Your photo preview will appear here.";
-                        uploadPromptText.style.color = "#777";
+                    for (const file of files) {
+                        if (file.type.startsWith('image/')) {
+                            createAndAppendPreview(file, currentCaption);
+                        } else {
+                            console.warn("Skipping non-image file:", file.name);
+                            // Create a placeholder indicating a skipped file
+                            const skippedFileDiv = document.createElement('div');
+                            skippedFileDiv.className = 'paper-sheet'; // Use same class for spacing
+                            skippedFileDiv.style.display = 'block';
+                            skippedFileDiv.style.textAlign = 'center';
+                            skippedFileDiv.style.padding = '20mm';
+                            skippedFileDiv.style.fontSize = '0.8em';
+                            skippedFileDiv.style.color = '#777';
+                            skippedFileDiv.style.border = '1px dashed #ccc';
+                            skippedFileDiv.textContent = `Skipped non-image file: ${file.name}`;
+                            previewContainer.appendChild(skippedFileDiv);
+                        }
                     }
+                } else {
                     uploadPromptText.style.display = 'block';
-                    paperSheet.style.display = 'none';
-                    instaxContainer.style.display = 'none'; // Explicitly hide
                     printButton.style.display = 'none';
-                    
-                    // Clear caption input and display if image is removed/invalid
-                    // captionInput.value = ''; // Keep user's typed text in textarea
-                    captionDisplay.textContent = ''; // But clear it from preview
                 }
+            });
+
+            captionInput.addEventListener('input', function() {
+                const currentCaption = this.value;
+                const allCaptionDisplays = previewContainer.querySelectorAll('.paper-sheet .instax-caption');
+                allCaptionDisplays.forEach(display => {
+                    display.textContent = currentCaption;
+                });
             });
 
             printButton.addEventListener('click', () => {
                 const originalTitle = document.title;
-                const filenameBase = "Instax_Print_4x6";
-                let filename = filenameBase;
+                let filename = "Instax_Prints_4x6_Collection";
                 if (imageUpload.files[0] && imageUpload.files[0].name) {
-                    const uploadedName = imageUpload.files[0].name.split('.')[0];
-                    filename = uploadedName + "_4x6_Layout";
+                     filename = "Instax_Batch_" + new Date().toISOString().slice(0,10);
                 }
-                // Sanitize filename for document title
-                document.title = filename.replace(/[^a-z0-9_.\-\s]/gi, '_').replace(/\s+/g, '_') + "_" + new Date().toISOString().slice(0,10);
-                
+                document.title = filename.replace(/[^a-z0-9_.\-\s]/gi, '_').replace(/\s+/g, '_');
                 window.print();
-                
-                // Optional: Restore title after print dialog
-                // setTimeout(() => { document.title = originalTitle; }, 2000);
             });
         });
     </script>
