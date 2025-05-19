@@ -152,7 +152,7 @@
         /* New Extended Trim Marks for 4x6 paper */
         .extended-trim-mark {
             position: absolute;
-            background-color: #555; /* Color for on-screen preview */
+            background-color: transparent; /* Color for on-screen preview */
             z-index: 5; /* Can be adjusted if needed */
         }
         .top-guide {
@@ -160,24 +160,28 @@
             left: 0;
             width: 100%; /* Full width of paper */
             height: 0.5px; /* Thin line */
+            border-top: 1px dashed #000000; /* Dashed line, screen color */
         }
         .bottom-guide {
             bottom: 8.8mm; /* Align with bottom edge of Instax print */
             left: 0;
             width: 100%; /* Full width of paper */
             height: 0.5px;
+            border-bottom: 1px dashed #000000; /* Dashed line, screen color */
         }
         .left-guide {
             left: 22.2mm; /* Align with left edge of Instax print */
             top: 0;
             height: 100%; /* Full height of paper */
             width: 0.5px;
+            border-left: 1px dashed #000000; /* Dashed line, screen color */
         }
         .right-guide {
             right: 22.2mm; /* Align with right edge of Instax print */
             top: 0;
             height: 100%; /* Full height of paper */
             width: 0.5px;
+            border-right: 1px dashed #000000; /* Dashed line, screen color */
         }
 
 
@@ -228,13 +232,26 @@
             }
 
             .extended-trim-mark {
-                background-color: #000000 !important; /* Trim marks should be black for print */
+                background-color: transparent !important; /* Trim marks should be black for print */
                 /* Consider using 1px for height/width if 0.5px is too faint on some printers */
                  /* height: 1px; or width: 1px; */
             }
 
             .image-inside {
                  background-color: transparent !important; /* No placeholder bg color on print */
+            }
+
+            .top-guide {
+                border-top: 1px dashed #000000 !important;
+            }
+            .bottom-guide {
+                border-bottom: 1px dashed #000000 !important;
+            }
+            .left-guide {
+                border-left: 1px dashed #000000 !important;
+            }
+            .right-guide {
+                border-right: 1px dashed #000000 !important;
             }
         }
     </style>
