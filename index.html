@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instax Wide Photo Printer</title>
+    <title>Instax Wide Photo Printer - 4x6 Layout</title>
     <style>
         /* Base and Reset */
         * {
@@ -19,13 +19,14 @@
             flex-direction: column;
             align-items: center;
             padding: 1rem; /* Padding around the content */
+            min-height: 100vh;
         }
 
         .controls-container {
             background: white;
             padding: 1.5rem;
             border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* Softer shadow */
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
             width: 100%;
             max-width: 500px;
             text-align: center;
@@ -34,7 +35,7 @@
 
         h1 {
             font-size: 1.6rem;
-            color: #2c3e50; /* Darker blue/gray */
+            color: #2c3e50;
             margin-bottom: 0.5rem;
         }
         p {
@@ -51,7 +52,7 @@
         .btn {
             display: inline-block;
             padding: 0.6rem 1.2rem;
-            background: #3498db; /* Brighter blue */
+            background: #3498db;
             color: white;
             border: none;
             border-radius: 5px;
@@ -61,14 +62,14 @@
             text-decoration: none;
         }
         .btn:hover {
-            background: #2980b9; /* Darker blue on hover */
+            background: #2980b9;
         }
         .btn-print {
-            background: #2ecc71; /* Green for print */
+            background: #2ecc71;
             margin-top: 1rem;
         }
         .btn-print:hover {
-            background: #27ae60; /* Darker green on hover */
+            background: #27ae60;
         }
         #imageUpload {
             display: none; /* Hidden file input */
@@ -83,34 +84,56 @@
         #uploadPromptText {
             text-align: center;
             margin-top: 1rem;
-            margin-bottom: 1rem; /* Ensure space if it reappears */
+            margin-bottom: 1rem;
             color: #777;
         }
 
-        .instax-container {
-            position: relative; /* For positioning trim marks */
-            width: 108mm; /* Outer dimension of Instax Wide film - Width */
-            height: 84mm; /* Outer dimension of Instax Wide film - Height (as per original user code) */
-            margin: 0 auto; /* Centered for screen viewing */
-            display: none; /* Hidden until image is loaded */
-            background-color: white; /* Simulates paper */
-            box-shadow: 0 6px 15px rgba(0,0,0,0.1); /* Visual lift on screen */
-            /* overflow: visible; is default but ensures trim marks outside are seen */
+        /* New Paper Sheet Container */
+        .paper-sheet {
+            position: relative; /* For absolute positioning of children */
+            width: 152.4mm;  /* 6 inches */
+            height: 101.6mm; /* 4 inches */
+            margin: 20px auto; /* Center the paper on the screen for preview */
+            background-color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); /* Visual lift for the paper */
+            display: none; /* Initially hidden, JS will show it */
+            overflow: hidden; /* Ensures nothing spills out */
         }
 
+        /* Base .instax-container styles (will be mostly overridden when inside .paper-sheet) */
+        .instax-container {
+            width: 108mm; /* Instax Wide width */
+            height: 84mm; /* Instax Wide height (as per your consistent CSS) */
+            position: relative; /* Default, overridden below */
+            margin: 20px auto; /* Default, overridden below */
+            display: none; /* Default, JS controls this */
+            /* background-color: white; /* instax-frame handles this */
+            /* box-shadow: 0 6px 15px rgba(0,0,0,0.1); /* Default, overridden below */
+        }
+        
+        /* Adjustments for .instax-container when inside .paper-sheet */
+        .paper-sheet .instax-container {
+            position: absolute;
+            top: 8.8mm;   /* (Paper Height - Instax Height) / 2 */
+            left: 22.2mm;  /* (Paper Width - Instax Width) / 2 */
+            box-shadow: none; /* Shadow is now on .paper-sheet */
+            margin: 0; /* Override previous auto margins */
+            background-color: transparent; /* Ensure no conflicting background */
+             /* display: block; /* JS will handle making this visible when paper-sheet is visible */
+        }
+
+        /* Styles for .instax-frame remain largely the same */
         .instax-frame {
             width: 100%;
             height: 100%;
-            background-color: white; /* Color of the Instax border area */
-            /* Padding defines the photo area within the frame: T:8mm, R:5mm, B:16mm, L:5mm */
-            /* This results in photo area: Height (84-8-16) = 60mm, Width (108-5-5) = 98mm */
-            padding: 8mm 5mm 16mm 5mm;
+            background-color: white; /* The actual white border of the Instax print */
+            padding: 8mm 5mm 16mm 5mm; /* T R B L -> Photo area: H (84-8-16)=60mm, W (108-5-5)=98mm */
             border-radius: 0; /* Approx rounded corners of an Instax print */
-            display: flex;
+            display: flex; /* For centering image-inside if needed, though object-fit handles it */
             align-items: center;
             justify-content: center;
-            overflow: hidden; /* Image clipped to photo area */
-            border: 1px dashed #aaa;
+            overflow: hidden; /* Image clipped to photo area defined by padding */
+            /*border: 1px dashed #aaa; /* Dashed border for the frame itself */
         }
 
         .image-inside {
@@ -119,27 +142,44 @@
             object-fit: cover; /* Cover the photo area, cropping if necessary */
             display: block;
             background-color: #e0e0e0; /* Placeholder bg before image loads */
-            /* border-radius: 1mm; /* Optional: slight rounding for the photo corners within the frame */
         }
 
-        /* Trim marks - visible on screen when preview is active */
-        .trim-mark {
+        /* Hide OLD L-shaped trim marks if they still exist in HTML (safeguard) */
+        .instax-container > .trim-mark {
+            display: none !important;
+        }
+
+        /* New Extended Trim Marks for 4x6 paper */
+        .extended-trim-mark {
             position: absolute;
-            background-color: #333; /* Dark gray for screen, black for print */
-            display: block; /* JS controls parent, so these are shown when parent is */
+            background-color: #555; /* Color for on-screen preview */
+            z-index: 5; /* Can be adjusted if needed */
         }
-        .trim-mark-h { height: 1px; width: 10mm; }
-        .trim-mark-v { width: 1px; height: 10mm; }
+        .top-guide {
+            top: 8.8mm; /* Align with top edge of Instax print */
+            left: 0;
+            width: 100%; /* Full width of paper */
+            height: 0.5px; /* Thin line */
+        }
+        .bottom-guide {
+            bottom: 8.8mm; /* Align with bottom edge of Instax print */
+            left: 0;
+            width: 100%; /* Full width of paper */
+            height: 0.5px;
+        }
+        .left-guide {
+            left: 22.2mm; /* Align with left edge of Instax print */
+            top: 0;
+            height: 100%; /* Full height of paper */
+            width: 0.5px;
+        }
+        .right-guide {
+            right: 22.2mm; /* Align with right edge of Instax print */
+            top: 0;
+            height: 100%; /* Full height of paper */
+            width: 0.5px;
+        }
 
-        /* Positioning trim marks to cross the container's edge (original style) */
-        .top-left-h { top: 0; left: -5mm; }
-        .top-left-v { top: -5mm; left: 0; }
-        .top-right-h { top: 0; right: -5mm; }
-        .top-right-v { top: -5mm; right: 0; }
-        .bottom-left-h { bottom: 0; left: -5mm; }
-        .bottom-left-v { bottom: -5mm; left: 0; }
-        .bottom-right-h { bottom: 0; right: -5mm; }
-        .bottom-right-v { bottom: -5mm; right: 0; }
 
         /* Print Styles */
         @media print {
@@ -147,50 +187,52 @@
                 background-color: white !important;
                 padding: 0 !important;
                 margin: 0 !important;
-                -webkit-print-color-adjust: exact !important; /* Ensure background colors print if any were essential */
+                -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
 
-            .controls-container, #printButton {
+            .controls-container, #printButton, #uploadPromptText {
                 display: none !important;
-            }
-            #uploadPromptText { /* Also hide this if it was somehow visible */
-                 display: none !important;
             }
 
             @page {
-                margin: 0; /* Remove browser default margins for printing */
-                size: auto; /* Use printer's default paper size */
+                margin: 0;
+                size: auto; /* Let user choose paper, or try '6in 4in' if you want to suggest it */
             }
 
-            #previewArea {
+            #previewArea { /* This flex container will center the .paper-sheet on the print page */
                 width: 100vw;
                 height: 100vh;
-                display: flex; /* Center the container on the print page */
+                display: flex;
                 align-items: center;
                 justify-content: center;
                 padding:0; margin:0;
             }
 
-            .instax-container {
-                display: block !important;
-                position: relative; /* Use relative for print flow, centering handled by #previewArea flex */
-                margin: 0 !important; /* Remove screen margin */
-                box-shadow: none !important; /* No shadow for print */
+            .paper-sheet {
+                display: block !important; /* Ensure it's visible for printing */
+                position: relative; /* Maintain for child positioning */
+                margin: 0 !important; /* Centering handled by #previewArea flex */
+                box-shadow: none !important;
                 page-break-inside: avoid !important;
-                /* For precise absolute centering on print (alternative to flex on #previewArea): */
-                /* position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); */
+                /* Width and height (152.4mm x 101.6mm) are already set */
+            }
+
+            .paper-sheet .instax-container { /* Ensure instax-container inside paper is visible */
+                display: block !important; 
+                /* Absolute positioning within .paper-sheet is already defined */
             }
 
             .instax-frame {
-                box-shadow: none !important;
-                border-radius: 0 !important; /* Maintain rounded corners for Instax look */
-                border: 1px dashed #aaa !important;
+                /*border: 1px dashed #aaa !important; /* Keep dashed border on frame for print */
             }
 
-            .trim-mark {
-                background-color: #000000 !important; /* Pure black trim marks for print */
+            .extended-trim-mark {
+                background-color: #000000 !important; /* Trim marks should be black for print */
+                /* Consider using 1px for height/width if 0.5px is too faint on some printers */
+                 /* height: 1px; or width: 1px; */
             }
+
             .image-inside {
                  background-color: transparent !important; /* No placeholder bg color on print */
             }
@@ -200,10 +242,10 @@
 <body>
     <div class="controls-container">
         <h1>Instax Wide Photo Printer</h1>
-        <p>Upload your photo. It will be previewed in an Instax Wide style.</p>
+        <p>Upload your photo. It will be centered on a 4x6 inch layout with trim marks.</p>
         <p class="dimensions-info">
-            Frame: 108mm × 84mm. Photo Area (approx): 98mm × 60mm.<br>
-            Borders (photo area to frame edge): Top: 8mm, Sides: 5mm, Bottom: 16mm.
+            Paper: 4in × 6in. Instax Frame (Outer): 84mm × 108mm.<br>
+            Photo Area (approx): 60mm × 98mm.
         </p>
 
         <label for="imageUpload" class="btn">
@@ -212,24 +254,21 @@
         <input type="file" id="imageUpload" accept="image/*">
 
         <button id="printButton" class="btn btn-print" style="display: none;">
-            Print Photo
+            Print 4x6 Layout
         </button>
     </div>
 
     <div id="previewArea">
         <p id="uploadPromptText">Your photo preview will appear here.</p>
-        <div class="instax-container">
-            <div class="trim-mark trim-mark-h top-left-h"></div>
-            <div class="trim-mark trim-mark-v top-left-v"></div>
-            <div class="trim-mark trim-mark-h top-right-h"></div>
-            <div class="trim-mark trim-mark-v top-right-v"></div>
-            <div class="trim-mark trim-mark-h bottom-left-h"></div>
-            <div class="trim-mark trim-mark-v bottom-left-v"></div>
-            <div class="trim-mark trim-mark-h bottom-right-h"></div>
-            <div class="trim-mark trim-mark-v bottom-right-v"></div>
 
-            <div class="instax-frame">
-                <img id="imagePreview" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Image Preview" class="image-inside">
+        <div class="paper-sheet"> <div class="extended-trim-mark top-guide"></div>
+            <div class="extended-trim-mark bottom-guide"></div>
+            <div class="extended-trim-mark left-guide"></div>
+            <div class="extended-trim-mark right-guide"></div>
+
+            <div class="instax-container"> <div class="instax-frame">
+                    <img id="imagePreview" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Image Preview" class="image-inside">
+                </div>
             </div>
         </div>
     </div>
@@ -238,7 +277,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             const imageUpload = document.getElementById('imageUpload');
             const imagePreview = document.getElementById('imagePreview');
-            const instaxContainer = document.querySelector('.instax-container');
+            const paperSheet = document.querySelector('.paper-sheet');
+            const instaxContainer = document.querySelector('.paper-sheet .instax-container'); // More specific selector
             const printButton = document.getElementById('printButton');
             const uploadPromptText = document.getElementById('uploadPromptText');
 
@@ -250,13 +290,14 @@
                         imagePreview.src = e.target.result;
                         imagePreview.style.backgroundColor = 'transparent';
 
-                        instaxContainer.style.display = 'block';
+                        paperSheet.style.display = 'block';
+                        instaxContainer.style.display = 'block'; // Ensure this is explicitly shown
+
                         uploadPromptText.style.display = 'none';
                         printButton.style.display = 'inline-block';
                     };
                     reader.readAsDataURL(file);
                 } else {
-                    // Reset if no file or invalid file
                     imagePreview.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
                     imagePreview.style.backgroundColor = '#e0e0e0';
                     
@@ -268,20 +309,25 @@
                         uploadPromptText.style.color = "#777"; // Default color
                     }
                     uploadPromptText.style.display = 'block';
-                    instaxContainer.style.display = 'none';
+                    paperSheet.style.display = 'none';
+                    instaxContainer.style.display = 'none'; // Also hide this explicitly
                     printButton.style.display = 'none';
                 }
             });
 
             printButton.addEventListener('click', () => {
                 const originalTitle = document.title;
-                // Generate a somewhat unique title for the print job if needed
-                const filename = imageUpload.files[0] ? imageUpload.files[0].name.split('.')[0] : 'Instax_Print';
-                document.title = filename + "_" + new Date().toISOString().slice(0,10);
+                const filenameBase = "Instax_Print_4x6";
+                let filename = filenameBase;
+                if (imageUpload.files[0] && imageUpload.files[0].name) {
+                    const uploadedName = imageUpload.files[0].name.split('.')[0];
+                    filename = uploadedName + "_4x6_Layout";
+                }
+                document.title = filename.replace(/[^a-z0-9_]+/gi, '_') + "_" + new Date().toISOString().slice(0,10);
                 
                 window.print();
                 
-                // Restore title after a delay, browser print dialog might block this
+                // Optional: Restore title after print dialog
                 // setTimeout(() => { document.title = originalTitle; }, 2000);
             });
         });
