@@ -107,6 +107,71 @@
             vertical-align: text-top;
         }
         
+        /* Trim marks */
+        .trim-mark {
+            position: absolute;
+            background-color: #000;
+            display: none;
+        }
+        
+        .trim-mark-h {
+            height: 1px;
+            width: 10mm;
+        }
+        
+        .trim-mark-v {
+            width: 1px;
+            height: 10mm;
+        }
+        
+        .top-left-h {
+            top: 0;
+            left: -5mm;
+        }
+        
+        .top-left-v {
+            top: -5mm;
+            left: 0;
+        }
+        
+        .top-right-h {
+            top: 0;
+            right: -5mm;
+        }
+        
+        .top-right-v {
+            top: -5mm;
+            right: 0;
+        }
+        
+        .bottom-left-h {
+            bottom: 0;
+            left: -5mm;
+        }
+        
+        .bottom-left-v {
+            bottom: -5mm;
+            left: 0;
+        }
+        
+        .bottom-right-h {
+            bottom: 0;
+            right: -5mm;
+        }
+        
+        .bottom-right-v {
+            bottom: -5mm;
+            right: 0;
+        }
+        
+        .instax-container {
+            position: relative;
+            width: 108mm;
+            height: 84mm;
+            margin: 20px auto;
+            display: none;
+        }
+        
         /* Print Styles */
         @media print {
             body, .app-container {
@@ -117,7 +182,7 @@
             }
             
             .app-container > *:not(#previewContainer),
-            #previewContainer > *:not(.instax-frame),
+            #previewContainer > *:not(.instax-container),
             #uploadPromptText {
                 display: none !important;
             }
@@ -127,22 +192,30 @@
                 size: auto;
             }
             
-            .instax-frame {
-                width: 108mm;
-                height: 84mm;
-                padding: 8mm 5mm 16mm;
-                border: 1px dashed #333 !important;
-                margin: 0 !important;
-                box-shadow: none !important;
-                border-radius: 0 !important;
+            .instax-container {
+                display: block !important;
                 page-break-inside: avoid !important;
                 position: absolute;
                 left: 50%;
                 top: 50%;
                 transform: translate(-50%, -50%);
+                position: fixed;
+            }
+            
+            .instax-frame {
+                width: 108mm;
+                height: 84mm;
+                padding: 8mm 5mm 16mm;
+                border: 1px dashed #aaa !important;
+                margin: 0 !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
                 overflow: hidden !important;
                 display: block !important;
-                position: fixed;
+            }
+            
+            .trim-mark {
+                display: block !important;
             }
         }
     </style>
@@ -150,7 +223,7 @@
 <body>
     <div class="app-container">
         <h1>Instax Wide Photo Maker</h1>
-        <p>Upload your photo to create an Instax-style print preview.</p>
+        <p>Upload your photo to create an Instax-style print with trim marks.</p>
         <p style="font-size: 0.875rem; color: #777; margin-bottom: 1.5rem;">
             Frame: 86mm × 108mm. Photo area: 62mm × 84mm.
             Borders: 8mm (top), 12mm (sides), 16mm (bottom).
@@ -163,8 +236,20 @@
 
         <div id="previewContainer">
             <p id="uploadPromptText">Your photo preview will appear here.</p>
-            <div class="instax-frame">
-                <img id="imagePreview" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Image Preview" class="image-inside">
+            <div class="instax-container">
+                <!-- Trim Marks -->
+                <div class="trim-mark trim-mark-h top-left-h"></div>
+                <div class="trim-mark trim-mark-v top-left-v"></div>
+                <div class="trim-mark trim-mark-h top-right-h"></div>
+                <div class="trim-mark trim-mark-v top-right-v"></div>
+                <div class="trim-mark trim-mark-h bottom-left-h"></div>
+                <div class="trim-mark trim-mark-v bottom-left-v"></div>
+                <div class="trim-mark trim-mark-h bottom-right-h"></div>
+                <div class="trim-mark trim-mark-v bottom-right-v"></div>
+                
+                <div class="instax-frame">
+                    <img id="imagePreview" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Image Preview" class="image-inside">
+                </div>
             </div>
         </div>
 
@@ -172,7 +257,7 @@
             <svg class="print-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v6a2 2 0 002 2h1v-4a1 1 0 011-1h8a1 1 0 011 1v4h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clip-rule="evenodd" />
             </svg>
-            Print with Cut Guide
+            Print with Trim Marks
         </button>
     </div>
 
@@ -182,6 +267,7 @@
             // Get elements
             const imageUpload = document.getElementById('imageUpload');
             const imagePreview = document.getElementById('imagePreview');
+            const instaxContainer = document.querySelector('.instax-container');
             const instaxFrame = document.querySelector('.instax-frame');
             const printButton = document.getElementById('printButton');
             const uploadPromptText = document.getElementById('uploadPromptText');
@@ -196,6 +282,7 @@
                     reader.onload = function(e) {
                         imagePreview.src = e.target.result;
                         imagePreview.style.backgroundColor = 'transparent';
+                        instaxContainer.style.display = 'block';
                         instaxFrame.style.display = 'block';
                         uploadPromptText.style.display = 'none';
                         printButton.style.display = 'inline-block';
