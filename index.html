@@ -4,206 +4,268 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Instax Multi-Photo Printer - 4x6 Layout</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;1,300;1,900&display=swap" rel="stylesheet">
+
     <style>
-        /* Base and Reset */
+        /* --- Global Styles & Page Setup --- */
+
+        /* This is a common reset. It tells the browser to calculate element sizes
+           in a more predictable way (including padding and borders in the total width/height)
+           and removes default margins and paddings. Think of it as zeroing out your layout grid. */
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
+
+        /* Styles for the main body of the page */
         body {
+            /* Sets the default font for the page. "Lato" is the primary, followed by fallbacks. */
             font-family: "Lato", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-            font-weight: 300;
-            line-height: 1.5;
-            background-color: #e9e9e9;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 1rem;
-            min-height: 100vh;
+            font-weight: 300;       /* A lighter weight of the font. */
+            line-height: 1.5;       /* The space between lines of text (1.5 times the font size). */
+            background-color: #e9e9e9; /* A light grey background for the overall page. */
+            display: flex;          /* Activates "flexbox" layout for the body's direct children. */
+            flex-direction: column; /* Stacks flex children vertically. */
+            align-items: center;    /* Centers flex children horizontally on the page. */
+            padding: 1rem;          /* Adds some space around the content within the body. 'rem' is relative to the root font size. */
+            min-height: 100vh;      /* Ensures the body takes up at least the full height of the browser window. */
         }
 
+        /* --- Controls Area Styling --- */
+        /* This is the white box containing all the upload buttons and text fields. */
         .controls-container {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            width: 100%;
-            max-width: 500px;
-            text-align: center;
-            margin-bottom: 2rem;
+            background: white;      /* White background for this section. */
+            padding: 1.5rem;        /* Internal spacing. */
+            border-radius: 8px;     /* Rounded corners for a softer look. */
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* A subtle shadow to make it "lift" off the page. */
+            width: 100%;            /* Takes the full available width of its parent. */
+            max-width: 500px;       /* But limits its maximum width. */
+            text-align: center;     /* Centers the text elements within this container. */
+            margin-bottom: 2rem;    /* Space below this container, before the previews start. */
         }
 
-        h1 {
-            font-size: 1.6rem;
-            color: #2c3e50;
-            margin-bottom: 0.5rem;
+        h1 { /* Styles for the main title "Instax Wide Photo Printer" */
+            font-size: 1.6rem;      /* Size of the heading text. */
+            color: #2c3e50;         /* A dark, slightly desaturated blue. */
+            margin-bottom: 0.5rem;  /* Space below the heading. */
         }
-        p {
-            color: #555;
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
+
+        p { /* Styles for general paragraph text within the controls. */
+            color: #555;            /* A medium-dark grey for good readability. */
+            margin-bottom: 1rem;    /* Space below each paragraph. */
+            font-size: 0.9rem;      /* Slightly smaller than the default. */
         }
-        .dimensions-info {
-            font-size: 0.8rem;
-            color: #777;
+
+        .dimensions-info { /* For the paragraph explaining paper/Instax dimensions. */
+            font-size: 0.8rem;      /* Even smaller text for this less critical info. */
+            color: #777;            /* Lighter grey. */
             margin-bottom: 1.5rem;
         }
 
+        /* Styles for groups of a label and its input field (e.g., "Subject:" and its text box) */
         .input-group {
-            margin-bottom: 1rem;
-            text-align: left;
+            margin-bottom: 1rem;    /* Space below each group. */
+            text-align: left;       /* Aligns the label text to the left. */
         }
+
         .input-group label {
-            display:block;
-            margin-bottom:0.35rem;
-            font-weight: 500;
-            font-size:0.9rem;
-            color:#444;
+            display: block;         /* Makes the label take up its own line. */
+            margin-bottom: 0.35rem; /* Small space between the label and its input field. */
+            font-weight: 500;       /* A medium font weight to make labels stand out a bit. */
+            font-size: 0.9rem;
+            color: #444;
         }
-        .input-group input[type="text"],
-        .input-group textarea {
-            width: 100%;
-            padding: 0.6rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+
+        .input-group input[type="text"], /* Targets text input fields */
+        .input-group textarea {          /* Targets multi-line text areas */
+            width: 100%;            /* Makes input fields fill the width of the .input-group. */
+            padding: 0.6rem;        /* Internal spacing within the input fields. */
+            border: 1px solid #ccc; /* A light grey border. */
+            border-radius: 4px;     /* Slightly rounded corners. */
             font-size: 0.9rem;
             line-height: 1.4;
         }
+
         .input-group textarea {
-            resize: vertical;
+            resize: vertical;       /* Allows the user to resize the caption box vertically. */
         }
 
-
-        .btn {
-            display: inline-block;
-            padding: 0.6rem 1.2rem;
-            background: #3498db;
-            color: white;
-            border: none;
-            border-radius: 5px;
+        /* --- Button Styling --- */
+        .btn { /* Common style for all buttons */
+            display: inline-block;  /* Allows setting padding/margin, but flows with text. */
+            padding: 0.6rem 1.2rem; /* Vertical and horizontal internal spacing. */
+            background: #3498db;    /* A pleasant blue. */
+            color: white;           /* Text color. */
+            border: none;           /* No visible border. */
+            border-radius: 5px;     /* Rounded corners. */
             font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            text-decoration: none;
+            cursor: pointer;        /* Changes the mouse cursor to a hand to indicate it's clickable. */
+            transition: background-color 0.2s; /* Smoothly animates background color changes (e.g., on hover). */
+            text-decoration: none;  /* Removes underline if this style was applied to a link. */
         }
-        .btn:hover {
-            background: #2980b9;
+
+        .btn:hover { /* Style for buttons when the mouse hovers over them. */
+            background: #2980b9;    /* A darker shade of blue. */
         }
-        .btn-print {
-            background: #2ecc71;
-            margin-top: 1rem;
+
+        .btn-print { /* Specific style for the "Print All Layouts" button. */
+            background: #2ecc71;    /* A green color. */
+            margin-top: 1rem;       /* Space above this button. */
         }
         .btn-print:hover {
-            background: #27ae60;
+            background: #27ae60;    /* Darker green on hover. */
         }
+
+        /* The actual file input <input type="file"> is hidden.
+           The "Upload Image(s)" button is a <label> styled to look like a button,
+           which then triggers this hidden input. This is a common UI trick. */
         #imageUpload {
             display: none;
         }
 
+        /* --- Preview Area --- */
+        /* This is where the generated image previews will appear below the controls. */
         #previewArea {
             width: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 20px;
+            gap: 20px;              /* Space between multiple preview sheets if more than one image is uploaded. */
         }
-        #uploadPromptText {
+        
+        /* This is a dedicated container within previewArea where individual previews will be added by JavaScript.
+           It helps simplify clearing old previews. */
+        #previewsOutput {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px; /* Same gap as parent for consistency if previewsOutput itself were to have multiple direct children groups */
+        }
+
+
+        #uploadPromptText { /* The "Your photo previews will appear here" message. */
             text-align: center;
             margin-top: 1rem;
             margin-bottom: 1rem;
             color: #777;
         }
 
+        /* --- Instax Print Layout Styling --- */
+        /* This section defines the visual appearance of the Instax-like print.
+           These are good styles to experiment with if you want to change the print layout.
+           Dimensions are mostly in 'mm' for better relation to physical print sizes. */
+
+        /* Represents the 4x6 inch paper sheet that the Instax print is centered on. */
         .paper-sheet {
-            position: relative;
-            width: 152.4mm; /* 6 inches */
-            height: 101.6mm; /* 4 inches */
-            background-color: white;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            display: none;
-            overflow: hidden;
+            position: relative;     /* Establishes a coordinate system for child elements positioned 'absolute' (like trim marks). */
+            width: 152.4mm;         /* 6 inches. */
+            height: 101.6mm;        /* 4 inches. */
+            background-color: white;/* Simulates white paper. */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); /* A subtle shadow for a 3D effect on screen. */
+            display: none;          /* Initially hidden. JavaScript will show it when an image is ready. */
+            overflow: hidden;       /* If anything accidentally extends beyond these dimensions, it's clipped. */
         }
 
+        /* This is the container for the Instax print itself, within the paper sheet. */
         .instax-container {
-            width: 108mm; /* Instax Wide film outer width */
-            height: 84mm; /* Instax Wide film outer height */
-            position: relative;
+            width: 108mm;           /* Outer width of an Instax Wide film. */
+            height: 84mm;           /* Outer height of an Instax Wide film. */
+            position: relative;     /* For positioning text elements like caption/subject absolutely within it. */
             margin: 0;
-            display: none;
+            display: none;          /* Also initially hidden. */
+            /* This container is then centered on the .paper-sheet using absolute positioning below. */
         }
         
+        /* This rule positions the .instax-container in the middle of the .paper-sheet. */
         .paper-sheet .instax-container {
-            position: absolute;
-            top: 8.8mm;  /* (101.6mm - 84mm) / 2 */
-            left: 22.2mm; /* (152.4mm - 108mm) / 2 */
-            box-shadow: none;
-            background-color: transparent;
+            position: absolute;     /* Positioned relative to the .paper-sheet. */
+            /* Calculations for centering: (Paper Dimension - Instax Dimension) / 2 */
+            top: 8.8mm;             /* (101.6mm - 84mm) / 2 */
+            left: 22.2mm;           /* (152.4mm - 108mm) / 2 */
+            box-shadow: none;       /* No shadow for the container itself when on the paper. */
+            background-color: transparent; /* It's just a holder, the .instax-frame inside provides color. */
         }
 
+        /* This is the actual white border area of the Instax print. */
         .instax-frame {
             width: 100%;
             height: 100%;
-            background-color: white; /* Instax border color */
-            /* Padding: Top, Sides, Bottom */
-            padding: 8mm 5mm 16mm 5mm; /* Standard Instax Wide border proportions */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            border: 1px dashed #aaa; /* Visual guide for the frame itself */
-            position: relative;
+            background-color: white;    /* The classic white Instax border. */
+            /* 'padding' creates the border. Think of it as the mat around a photo.
+               Values are: Top, Right & Left, Bottom.
+               Adjust these 'mm' values to change the border thickness. */
+            padding: 8mm 5mm 16mm 5mm; /* Typical Instax Wide proportions. */
+            display: flex;              /* Used to help center the image inside. */
+            align-items: center;        /* Vertically centers the image. */
+            justify-content: center;    /* Horizontally centers the image. */
+            overflow: hidden;           /* Ensures the photo doesn't spill outside this frame. */
+            border: 1px dashed #aaa;    /* A light dashed line on screen as a visual guide for the frame itself. */
+            position: relative;         /* Allows text (subject, caption) to be positioned relative to this frame. */
         }
 
+        /* This is the actual photo. */
         .image-inside {
-            width: 100%;  /* Fills the area inside padding */
-            height: 100%; /* Fills the area inside padding */
+            width: 100%;            /* Fills the available space inside the .instax-frame's padding. */
+            height: 100%;           /* Fills the available space inside the .instax-frame's padding. */
+            /* 'object-fit: cover' scales the image to fill the area, maintaining aspect ratio.
+               Some parts of the image might be cropped if the aspect ratios don't match.
+               Other options: 'contain' (shows full image, might leave empty space), 'fill' (stretches). */
             object-fit: cover;
-            display: block;
-            background-color: #e0e0e0; /* Placeholder bg */
+            display: block;         /* Removes any extra space below the image that can sometimes appear. */
+            background-color: #e0e0e0; /* A light grey placeholder background shown before the image loads. */
         }
         
-        .instax-subject {
+        /* --- Text on the Instax Print --- */
+        /* Styles for the text elements (subject, caption, signature) placed on the Instax frame.
+           You can change font, size, color, and positioning here.
+           'position: absolute' means their location is relative to the '.instax-frame'. */
+
+        .instax-subject { /* For the "Subject" text. */
             position: absolute;
-            bottom: 12mm; /* Adjust as needed */
-            right: 5mm;  /* Align with frame side padding + a bit more */
-            font-size: 2mm; /* Adjust size */
+            bottom: 12mm;           /* Distance from the BOTTOM EDGE of the Instax frame. */
+            right: 5mm;             /* Distance from the RIGHT EDGE of the Instax frame. */
+            font-size: 2mm;         /* Try changing this for different text sizes. */
             font-family: "Lato", sans-serif;
             font-weight: 300;
-            color: #333;
+            color: #333;            /* Dark grey text. */
             line-height: 1.2;
             text-align: right;
-            max-width: 40%; /* Prevent overlap */
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            max-width: 40%;         /* Prevents text from being too wide and overlapping other things. */
+            overflow: hidden;       /* If text is too long, it's cut off. */
+            text-overflow: ellipsis;/* Adds "..." if text is cut off. */
+            white-space: nowrap;    /* Keeps the subject on a single line. */
         }
 
-        .instax-caption { /* This is the multi-line text block */
+        .instax-caption { /* For the multi-line "Caption" text. */
             position: absolute;
-            bottom: 5mm; /* Positioned above the signature if they are separate, or main text position */
-            left: 5mm; /* Align with frame side padding + a bit more */
-            font-size: 2mm; /* Smaller font size as requested */
+            bottom: 5mm;            /* Distance from the bottom edge. */
+            left: 5mm;              /* Distance from the left edge. */
+            font-size: 2mm;
             font-family: "Lato", sans-serif;
             font-weight: 300;
             color: #333;
-            line-height: 1.25; /* Adjust for smaller font */
+            line-height: 1.25;
             text-align: left;
-            white-space: pre-wrap; /* Preserve line breaks from textarea */
-            max-width: 50%; /* Prevent overlap with subject if too long */
-            max-height: 10mm; /* Max height for the caption block */
-            overflow-y: hidden;
+            /* 'white-space: pre-wrap' is important: it makes the text wrap and also respects
+               any line breaks you type into the caption textarea. */
+            white-space: pre-wrap;
+            max-width: 50%;         /* Limits width. */
+            max-height: 10mm;       /* Limits height; caption may be cut if too long. */
+            overflow-y: hidden;     /* Hides vertical overflow. */
         }
 
-        .instax-signature {
+        .instax-signature { /* For the "Signature" text. */
             position: absolute;
-            bottom: 1.5mm; /* Below or aligned with subject */
+            bottom: 1.5mm;
             right: 2.5mm;
-            font-size: 2mm; /* Adjust size */
-            font-family: "Lato", sans-serif; /* Or a more script-like font if you add one */
+            font-size: 2mm;
+            /* You could try a more script-like font here if you add one. */
+            font-family: "Lato", sans-serif;
             font-weight: 300;
             color: #444;
             line-height: 1;
@@ -214,77 +276,93 @@
             white-space: nowrap;
         }
 
-        /* Trim marks for the paper sheet */
+        /* --- Trim Marks Styling --- */
+        /* These are the dashed lines on the 4x6 paper to guide cutting out the Instax print. */
         .extended-trim-mark {
-            position: absolute;
-            z-index: 5;
-            background-color: transparent;
+            position: absolute;     /* Positioned relative to the .paper-sheet. */
+            z-index: 5;             /* Ensures they draw on top of other elements if overlap occurs. */
+            background-color: transparent; /* They are just lines, no background. */
         }
+        /* Each class below creates one of the four dashed guide lines. */
         .top-guide    { top: 8.8mm; left: 0; width: 100%; height: 0; border-top: 1px dashed #555; }
         .bottom-guide { bottom: 8.8mm; left: 0; width: 100%; height: 0; border-bottom: 1px dashed #555; }
         .left-guide   { left: 22.2mm; top: 0; height: 100%; width: 0; border-left: 1px dashed #555; }
         .right-guide  { right: 22.2mm; top: 0; height: 100%; width: 0; border-right: 1px dashed #555; }
 
+
+        /* --- Print-Specific Styles --- */
+        /* These styles ONLY apply when you actually print the page (or "Print to PDF").
+           They override some of the screen styles for optimal printing. */
         @media print {
             body {
-                background-color: white !important;
+                background-color: white !important; /* Ensure paper background is white. '!important' overrides other rules. */
                 padding: 0 !important;
                 margin: 0 !important;
+                /* These ensure browsers attempt to print background colors and images. */
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
 
+            /* Hide elements that are not part of the actual print output. */
             .controls-container, #printButton, #uploadPromptText {
                 display: none !important;
             }
 
+            /* Defines properties for the printed page itself. */
             @page {
-                margin: 0;
-                size: 6in 4in; /* Explicitly set page size for printing */
+                margin: 0;          /* No printer margins around the 4x6 content. */
+                size: 6in 4in;      /* Sets the output page size to exactly 4x6 inches. */
             }
 
-            #previewArea {
-                width: auto;
+            #previewArea, #previewsOutput {
+                width: auto;        /* Let dimensions be natural for print. */
                 height: auto;
-                display: block;
-                gap: 0;
+                display: block;     /* Simpler layout model for printing. */
+                gap: 0;             /* No gap between sheets in the print stream. */
             }
 
             .paper-sheet {
-                display: block !important;
-                position: relative; /* Changed from fixed/absolute for page flow */
-                margin: 0 auto !important; /* Center on page if needed, but margin:0 from @page should handle */
-                box-shadow: none !important;
-                page-break-after: always;
-                page-break-inside: avoid !important;
+                display: block !important; /* Ensure sheets are visible. */
+                position: relative; /* Keep positioning context for children. */
+                margin: 0 auto !important; /* Center on the page (though @page handles most of this). */
+                box-shadow: none !important; /* No shadows on the printed version. */
+                page-break-after: always; /* Each .paper-sheet will start on a new printed page. */
+                page-break-inside: avoid !important; /* Tries to prevent a sheet from breaking across two pages. */
             }
-             #previewArea .paper-sheet:last-child {
+            /* Prevents an unnecessary page break after the very last sheet. */
+            #previewsOutput .paper-sheet:last-child {
                 page-break-after: auto;
             }
 
             .paper-sheet .instax-container {
-                display: block !important;
+                display: block !important; /* Ensure Instax area is visible. */
             }
 
             .instax-frame {
-                border: 1px dashed #888 !important; /* Lighter dash for print or transparent */
+                /* For print, you might want a fainter guide line or none at all. */
+                border: 1px dashed #888 !important; /* Lighter dashed line for print. */
             }
             
+            /* Ensures text is pure black for maximum contrast on print. */
             .instax-subject, .instax-caption, .instax-signature {
-                color: #000000 !important; /* Ensure text is black for printing */
+                color: #000000 !important;
+                /* Font sizes are explicitly set in 'mm' for print to ensure correct physical size. */
+                font-size: 2mm !important;
             }
-            .instax-subject { font-size: 2mm !important; }
-            .instax-caption { font-size: 2mm !important; }
-            .instax-signature { font-size: 2mm !important; }
+            /* Redundant with above, but for clarity if individual sizes were different: */
+            /* .instax-subject { font-size: 2mm !important; } */
+            /* .instax-caption { font-size: 2mm !important; } */
+            /* .instax-signature { font-size: 2mm !important; } */
 
-
+            /* Ensure trim guides are black for printing. */
             .top-guide    { border-top-color: #000000 !important; }
             .bottom-guide { border-bottom-color: #000000 !important; }
             .left-guide   { border-left-color: #000000 !important; }
             .right-guide  { border-right-color: #000000 !important; }
 
+            /* Remove the placeholder background from the image area for printing. */
             .image-inside {
-                 background-color: transparent !important;
+                background-color: transparent !important;
             }
         }
     </style>
@@ -325,44 +403,63 @@
 
     <div id="previewArea">
         <p id="uploadPromptText">Your photo previews will appear here.</p>
+        <div id="previewsOutput"></div>
     </div>
 
     <script>
+        // This whole block of JavaScript code will run after the HTML page structure is fully loaded.
         document.addEventListener('DOMContentLoaded', () => {
-            const imageUpload = document.getElementById('imageUpload');
-            const previewContainer = document.getElementById('previewArea');
-            const printButton = document.getElementById('printButton');
-            const uploadPromptText = document.getElementById('uploadPromptText');
             
-            const subjectInput = document.getElementById('subjectText');
-            const captionInput = document.getElementById('captionText');
-            const signatureInput = document.getElementById('signatureText');
+            // --- Get references to important HTML elements ---
+            // Storing these in variables makes it easier to refer to them later in the code.
+            // Think of these as handles to the visual elements on your page.
+            const imageUpload = document.getElementById('imageUpload');         // The hidden file input.
+            const previewsOutput = document.getElementById('previewsOutput');   // The container where image previews will go.
+            const printButton = document.getElementById('printButton');         // The "Print All Layouts" button.
+            const uploadPromptText = document.getElementById('uploadPromptText'); // The "Your photo previews..." message.
+            
+            const subjectInput = document.getElementById('subjectText');       // The text field for "Subject".
+            const captionInput = document.getElementById('captionText');       // The text area for "Caption".
+            const signatureInput = document.getElementById('signatureText');   // The text field for "Signature".
 
+            let pageInitialTitle = document.title; // Store the original title of the page to restore it after printing.
+
+            // --- Core Function: Create and Display a Single Image Preview ---
+            // This function is responsible for building the HTML structure for one Instax-style preview.
+            // It takes the image file and the text for subject, caption, and signature.
             function createAndAppendPreview(file, subjectText, captionText, signatureText) {
+                
+                // 1. Create the 'paper-sheet' element (the 4x6 inch background).
+                //    'document.createElement' is how you make new HTML elements with JavaScript.
                 const paperSheet = document.createElement('div');
-                paperSheet.className = 'paper-sheet';
+                paperSheet.className = 'paper-sheet'; // Assigns CSS class for styling.
 
+                // 2. Add trim mark elements (the dashed cutting guides).
                 const trimMarkClasses = ['top-guide', 'bottom-guide', 'left-guide', 'right-guide'];
                 trimMarkClasses.forEach(cls => { 
                     const mark = document.createElement('div'); 
                     mark.className = `extended-trim-mark ${cls}`; 
-                    paperSheet.appendChild(mark); 
+                    paperSheet.appendChild(mark); // Adds the trim mark to the paper sheet.
                 });
 
+                // 3. Create the 'instax-container' (logical wrapper for the Instax frame).
                 const instaxContainer = document.createElement('div'); 
                 instaxContainer.className = 'instax-container';
                 
+                // 4. Create the 'instax-frame' (the white border area).
                 const instaxFrame = document.createElement('div'); 
                 instaxFrame.className = 'instax-frame';
 
+                // 5. Create the 'img' element that will display the uploaded photo.
                 const imageElement = document.createElement('img');
                 imageElement.className = 'image-inside';
-                imageElement.alt = file.name + ' preview';
-                imageElement.style.backgroundColor = '#e0e0e0'; // Placeholder
+                imageElement.alt = file.name + ' preview'; // Good practice for accessibility.
+                imageElement.style.backgroundColor = '#e0e0e0'; // Placeholder color until image loads.
 
+                // 6. Create elements for the text overlays (subject, caption, signature).
                 const subjectDisplay = document.createElement('div');
                 subjectDisplay.className = 'instax-subject';
-                subjectDisplay.textContent = subjectText;
+                subjectDisplay.textContent = subjectText; // Sets the actual text content.
 
                 const captionDisplay = document.createElement('div');
                 captionDisplay.className = 'instax-caption';
@@ -372,131 +469,147 @@
                 signatureDisplay.className = 'instax-signature';
                 signatureDisplay.textContent = signatureText;
 
+                // 7. Assemble the preview structure by appending elements to each other:
+                //    - Text overlays go inside the 'instax-frame'.
                 instaxFrame.appendChild(imageElement);
                 instaxFrame.appendChild(subjectDisplay);
                 instaxFrame.appendChild(captionDisplay);
                 instaxFrame.appendChild(signatureDisplay);
                 
+                //    - The 'instax-frame' goes inside the 'instax-container'.
                 instaxContainer.appendChild(instaxFrame);
+                //    - The 'instax-container' goes inside the 'paper-sheet'.
                 paperSheet.appendChild(instaxContainer);
-                previewContainer.appendChild(paperSheet);
+                //    - Finally, the complete 'paper-sheet' is added to the 'previewsOutput' area on the page.
+                previewsOutput.appendChild(paperSheet);
 
-                // Inline worker script as a Blob
+                // --- Image Processing using a Web Worker (Advanced Part) ---
+                // This section handles image loading and preparation.
+                // A "Web Worker" is like a helper script that runs in the background.
+                // This is used so that if you upload a large image, the main webpage doesn't freeze
+                // while the image is being processed. You can mostly treat this as a "black box"
+                // that takes an image file and gives back a displayable version.
+
+                // The worker script itself is defined here as a text string.
                 const workerScript = `
-                    self.onmessage = async ({ data }) => {
-                        const { file, targetWidth, targetHeight } = data;
-                        const bitmap = await createImageBitmap(file);
+                    self.onmessage = async ({ data }) => { // This runs when the worker receives a message (the image file)
+                        const { file } = data;
+                        // Creates a special image object that's efficient for drawing.
+                        const bitmap = await createImageBitmap(file); 
                         
-                        // Calculate actual image dimensions for the instax photo area
-                        // Instax Wide Photo Area: approx 99mm (width) x 62mm (height)
-                        // Frame padding: top 8mm, sides 5mm, bottom 16mm
-                        // Image container width: 108mm - (2 * 5mm) = 98mm
-                        // Image container height: 84mm - 8mm - 16mm = 60mm
-                        // Let's use DPI for conversion: 300 DPI
-                        // 98mm to pixels at 300 DPI = (98 / 25.4) * 300 = 1157 pixels
-                        // 60mm to pixels at 300 DPI = (60 / 25.4) * 300 = 709 pixels
-                        // The worker is resizing to targetWidth, targetHeight which are passed
-                        // The CSS object-fit:cover handles the display aspect ratio.
-
-                        const offscreen = new OffscreenCanvas(bitmap.width, bitmap.height); // Use original bitmap dimensions first
-                        const ctx = offscreen.getContext('2d');
-                        ctx.drawImage(bitmap, 0, 0); // Draw full image
+                        // An "OffscreenCanvas" is a drawing surface that isn't visible on the page.
+                        // We draw the image here to prepare it. Uses the image's original dimensions.
+                        const offscreen = new OffscreenCanvas(bitmap.width, bitmap.height);
+                        const ctx = offscreen.getContext('2d'); // Gets the 2D drawing tools.
+                        ctx.drawImage(bitmap, 0, 0); // Draws the image onto the offscreen canvas.
                         
-                        // The conversion to Blob will handle final compression.
-                        // Quality of JPEG is important.
+                        // Converts the drawn image to a "Blob" (Binary Large Object), which is like a file in memory.
+                        // 'image/jpeg' is the format, 'quality: 0.92' balances size and visual quality (0 to 1).
                         const blob = await offscreen.convertToBlob({ type: 'image/jpeg', quality: 0.92 });
-                        self.postMessage({ blob });
+                        
+                        // Sends the processed image blob back to the main script.
+                        self.postMessage({ blob }); 
                     };
                 `;
+                // Create the worker from the script string.
                 const blobObj = new Blob([workerScript], { type: 'application/javascript' });
-                const workerURL = URL.createObjectURL(blobObj);
+                const workerURL = URL.createObjectURL(blobObj); // Creates a temporary URL for the worker script.
                 const worker = new Worker(workerURL);
 
-                // targetWidth & targetHeight for worker are more about processing constraints
-                // The CSS object-fit:cover on .image-inside is what actually fits it visually.
-                // Let's use a reasonable processing size.
-                worker.postMessage({ file, targetWidth: 2400, targetHeight: 1800 }); // Example processing dimensions
+                // Send the image file to the worker to start processing.
+                worker.postMessage({ file });
 
+                // This function runs when the worker sends the processed image back.
                 worker.onmessage = ({ data }) => {
-                    const { blob } = data;
-                    const url = URL.createObjectURL(blob);
-                    imageElement.src = url;
-                    imageElement.style.backgroundColor = 'transparent';
+                    const { blob } = data; // The processed image data.
+                    const url = URL.createObjectURL(blob); // Create a temporary URL for this image data.
+                    
+                    imageElement.src = url; // Set this URL as the source for our 'img' element, making it visible.
+                    imageElement.style.backgroundColor = 'transparent'; // Remove the placeholder.
+                    
+                    // Now that the image is ready, make the preview elements visible.
                     paperSheet.style.display = 'block';
                     instaxContainer.style.display = 'block'; 
-                    URL.revokeObjectURL(workerURL); // Clean up blob URL for the worker script
+                    
+                    URL.revokeObjectURL(workerURL); // Clean up the temporary URL for the worker script itself.
+                                                    // The image blob URL (url) will be revoked when previews are cleared.
                 };
 
+                // This function runs if an error occurs in the worker.
                 worker.onerror = (err) => {
                     console.error('Worker error:', err);
-                    const reader = new FileReader();
+                    // Fallback: If worker fails, try to load image directly (less efficient for large images).
+                    const reader = new FileReader(); // A standard way to read files.
                     reader.onload = function(e) {
-                        imageElement.src = e.target.result;
+                        imageElement.src = e.target.result; // e.target.result is a base64 data URL.
                         imageElement.style.backgroundColor = 'transparent';
                         paperSheet.style.display = 'block';
                         instaxContainer.style.display = 'block';
                     };
-                    reader.readAsDataURL(file);
-                    URL.revokeObjectURL(workerURL); // Clean up
+                    reader.readAsDataURL(file); // Reads the file content.
+                    URL.revokeObjectURL(workerURL); // Clean up.
                 };
+                // --- End of Web Worker Section ---
             }
 
+            // --- Event Listener for Image Upload ---
+            // This code runs when you select file(s) using the "Upload Image(s)" button.
             imageUpload.addEventListener('change', function(event) {
-                // Clear previous previews
-                while (previewContainer.firstChild && previewContainer.firstChild !== uploadPromptText) {
-                    if (previewContainer.firstChild.querySelector && previewContainer.firstChild.querySelector('.image-inside')) {
-                         const oldUrl = previewContainer.firstChild.querySelector('.image-inside').src;
-                         if (oldUrl && oldUrl.startsWith('blob:')) {
-                            URL.revokeObjectURL(oldUrl);
-                         }
+                // 1. Clear any previous previews.
+                //    - First, release memory from old image blob URLs.
+                const imagesToRevoke = previewsOutput.querySelectorAll('.image-inside');
+                imagesToRevoke.forEach(img => {
+                    if (img.src && img.src.startsWith('blob:')) { // Only revoke URLs created by URL.createObjectURL.
+                        URL.revokeObjectURL(img.src);
                     }
-                    previewContainer.removeChild(previewContainer.firstChild);
-                }
-                if(uploadPromptText.nextSibling) { // if there are elements after prompt, clear them
-                     while (uploadPromptText.nextSibling) {
-                         if (uploadPromptText.nextSibling.querySelector && uploadPromptText.nextSibling.querySelector('.image-inside')) {
-                             const oldUrl = uploadPromptText.nextSibling.querySelector('.image-inside').src;
-                             if (oldUrl && oldUrl.startsWith('blob:')) {
-                                URL.revokeObjectURL(oldUrl);
-                             }
-                         }
-                         uploadPromptText.nextSibling.remove();
-                     }
-                }
+                });
+                //    - Then, remove all old preview elements from the page.
+                previewsOutput.innerHTML = ''; 
 
-
-                const files = event.target.files;
+                const files = event.target.files; // Get the list of files you selected.
                 if (files.length > 0) {
-                    uploadPromptText.style.display = 'none';
-                    printButton.style.display = 'inline-block';
+                    uploadPromptText.style.display = 'none';    // Hide the "Your photo previews..." message.
+                    printButton.style.display = 'inline-block'; // Show the "Print All" button.
                     
+                    // Get the current text from the input fields.
                     const currentSubject = subjectInput.value;
                     const currentCaption = captionInput.value;
                     const currentSignature = signatureInput.value;
 
+                    // Loop through each file you selected.
                     for (const file of files) {
-                        if (file.type.startsWith('image/')) {
+                        if (file.type.startsWith('image/')) { // Check if it's an image file.
+                            // If it's an image, create and display its preview.
                             createAndAppendPreview(file, currentSubject, currentCaption, currentSignature);
                         } else {
+                            // If not an image, show a "skipped file" message in its place.
                             console.warn('Skipping non-image file:', file.name);
                             const skipped = document.createElement('div');
-                            skipped.className = 'paper-sheet'; 
-                            skipped.style.cssText = 'display:block; text-align:center; padding:20mm; font-size:0.8em; color:#777; border:1px dashed #ccc;';
+                            skipped.className = 'paper-sheet'; // Use paper-sheet for consistent sizing in the column.
+                            skipped.style.cssText = 'display:block; text-align:center; padding:20mm; font-size:0.8em; color:#777; border:1px dashed #ccc; align-content:center;';
                             skipped.textContent = `Skipped non-image file: ${file.name}`;
-                            previewContainer.appendChild(skipped);
+                            previewsOutput.appendChild(skipped);
                         }
                     }
                 } else {
+                    // If no files are selected (e.g., you cleared the selection), show the prompt and hide the print button.
                     uploadPromptText.style.display = 'block';
                     printButton.style.display = 'none';
                 }
             });
 
-            function updateAllTextPreviews(selector, value) {
-                previewContainer.querySelectorAll(selector)
-                    .forEach(el => el.textContent = value);
+            // --- Function to Update Text on All Existing Previews ---
+            // This is called when you type into the Subject, Caption, or Signature fields.
+            // It finds all corresponding text elements in the previews and updates them.
+            function updateAllTextPreviews(cssSelector, newTextValue) {
+                // 'previewsOutput.querySelectorAll(cssSelector)' finds all elements matching the selector
+                // (e.g., all elements with class '.instax-subject').
+                previewsOutput.querySelectorAll(cssSelector)
+                    .forEach(element => element.textContent = newTextValue); // Updates their text.
             }
 
+            // Add "input" event listeners to the text fields.
+            // These trigger every time you type something in the field.
             subjectInput.addEventListener('input', function() {
                 updateAllTextPreviews('.instax-subject', this.value);
             });
@@ -507,30 +620,30 @@
                 updateAllTextPreviews('.instax-signature', this.value);
             });
 
+            // --- Event Listener for the Print Button ---
             printButton.addEventListener('click', () => {
-                const originalTitle = document.title;
-                let filename = 'Instax_Prints_4x6_Collection';
-                // Use the first uploaded image name for a more specific batch name if available
+                let filename = 'Instax_Prints_4x6_Collection'; // Default filename for the print job/PDF.
+                
+                // Try to create a more specific filename based on the first uploaded image.
                 if (imageUpload.files && imageUpload.files.length > 0 && imageUpload.files[0]?.name) {
-                    const firstFileName = imageUpload.files[0].name.split('.').slice(0, -1).join('.'); // Name without extension
-                    filename = `Instax_Batch_${firstFileName}_${new Date().toISOString().slice(0,10)}`;
+                    const firstFileName = imageUpload.files[0].name.split('.').slice(0, -1).join('.'); // Removes file extension.
+                    const today = new Date().toISOString().slice(0,10); // Gets date as YYYY-MM-DD.
+                    filename = `Instax_Batch_${firstFileName}_${today}`;
                 } else {
-                     filename = `Instax_Batch_${new Date().toISOString().slice(0,10)}`;
+                     const today = new Date().toISOString().slice(0,10);
+                     filename = `Instax_Batch_${today}`;
                 }
+                // Set the page title to this filename (PDF printers often use this as the default file name).
+                // Replaces characters that might be problematic in filenames.
                 document.title = filename.replace(/[^a-z0-9_.\-\s]/gi, '_').replace(/\s+/g, '_');
                 
-                window.print();
-                
-                // Optional: Restore original title after print dialog
-                // setTimeout(() => { document.title = originalTitle; }, 1000);
+                window.print(); // Opens the browser's print dialog.
             });
             
-            // Restore title if print is cancelled or done
-            window.onafterprint = () => {
-                // document.title = originalTitle; // This won't work as originalTitle is not in this scope
-                // For simplicity, we might just leave the title as the filename, or reset to a default.
-                // document.title = "Instax Multi-Photo Printer - 4x6 Layout";
-            };
+            // This event listener runs after the print dialog is closed (whether you printed or cancelled).
+            window.addEventListener('afterprint', () => {
+                document.title = pageInitialTitle; // Restore the original page title.
+            });
         });
     </script>
 </body>
